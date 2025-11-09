@@ -15,10 +15,7 @@ namespace EMS.Models
         [StringLength(255)]
         public string FullName { get; set; } // যেমন: "Computer Science & Engineering"
 
-        // Navigation Property: একটি ডিপার্টমেন্টে অনেক ইউজার থাকতে পারে
-        public ICollection<ApplicationUser> Users { get; set; }
-
-        // Navigation Property: একটি ডিপার্টমেন্টে অনেক কোর্স থাকতে পারে
-        public ICollection<Course> Courses { get; set; }
+        public ICollection<ApplicationUser> Users { get; set; } = new List<ApplicationUser>();
+        public ICollection<Course> Courses { get; set; } = new List<Course>();
     }
 }
