@@ -10,5 +10,9 @@ namespace EMS.Data
             : base(options)
         {
         }
+
+        public DbSet<Department> Departments { get; set; }
+        public DbSet<Course> Courses { get; set; }
+
     }
 }
