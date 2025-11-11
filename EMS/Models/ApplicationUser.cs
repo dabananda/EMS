@@ -13,14 +13,15 @@ namespace EMS.Models
         [StringLength(100)]
         public string LastName { get; set; }
 
-        // Foreign Key: এই ইউজার কোন ডিপার্টমেন্টের?
-        public int? DepartmentId { get; set; }
+        // --- এই ৪টি লাইন ডিলিট করো ---
+        // public int? DepartmentId { get; set; } 
+        // public Department? Department { get; set; }
+        // public int? SemesterId { get; set; } 
+        // public Semester? Semester { get; set; }
 
-        // Navigation Property: ডিপার্টমেন্ট টেবিলের সাথে লিঙ্ক
-        public Department? Department { get; set; }
-
-        // সেমিস্টার (শুধুমাত্র স্টুডেন্টদের জন্য, তাই Nullable)
-        public int? SemesterId { get; set; }
-        public Semester? Semester { get; set; }
+        // --- নতুন এই ২টি লাইন যোগ করো ---
+        // Navigation Properties (1-to-1)
+        public StudentProfile? StudentProfile { get; set; }
+        public TeacherProfile? TeacherProfile { get; set; }
     }
 }

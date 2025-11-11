@@ -1,47 +1,204 @@
 ﻿@model EMS.Models.ViewModels.CreateUserViewModel
+
 @{
     ViewData["Title"] = "Create New User";
 }
 
-<h1>@ViewData["Title"]</h1>
-<h4>Create a new account and assign a role.</h4>
+<h4>@ViewData["Title"]</h4>
 <hr />
-<div class="row">
+
+<form asp-action="CreateUser" method="post" class="row g-3">
     <div class="col-md-6">
-        <form method="post" asp-action="CreateUser">
-            <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
-
-            <div class="form-floating mb-3">
-                <input asp-for="Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
-                <label asp-for="Email">Email</label>
-                <span asp-validation-for="Email" class="text-danger"></span>
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0">1. Account Information</h5>
             </div>
+            <div class="card-body">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-            <div class="form-floating mb-3">
-                <input asp-for="Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                <label asp-for="Password">Password</label>
-                <span asp-validation-for="Password" class="text-danger"></span>
+                <div class="mb-3">
+                    <label asp-for="Email" class="form-label"></label>
+                    <input asp-for="Email" class="form-control" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Password" class="form-label"></label>
+                    <input asp-for="Password" class="form-control" />
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="ConfirmPassword" class="form-label"></label>
+                    <input asp-for="ConfirmPassword" class="form-control" />
+                    <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                </div>
             </div>
+        </div>
 
-            <div class="form-floating mb-3">
-                <input asp-for="ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                <label asp-for="ConfirmPassword">Confirm Password</label>
-                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+        <div class="card shadow-sm mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">2. Common Information</h5>
             </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="FirstName" class="form-label"></label>
+                        <input asp-for="FirstName" class="form-control" />
+                        <span asp-validation-for="FirstName" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="LastName" class="form-label"></label>
+                        <input asp-for="LastName" class="form-control" />
+                        <span asp-validation-for="LastName" class="text-danger"></span>
+                    </div>
+                </div>
 
-            <div class="form-floating mb-3">
-                <select asp-for="Role" class="form-control" asp-items="@Model.RoleList" aria-required="true">
-                    <option value="">Select a Role</option>
-                </select>
-                <label asp-for="Role">Role</label>
-                <span asp-validation-for="Role" class="text-danger"></span>
+                <div class="mb-3">
+                    <label asp-for="Role" class="form-label"></label>
+                    <select asp-for="Role" asp-items="@Model.RoleList" class="form-select" id="roleSelector">
+                        <option value="">-- Select Role --</option>
+                    </select>
+                    <span asp-validation-for="Role" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="DepartmentId" class="form-label"></label>
+                    <select asp-for="DepartmentId" asp-items="@Model.DepartmentList" class="form-select">
+                        <option value="">-- Select Department --</option>
+                    </select>
+                    <span asp-validation-for="DepartmentId" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="PhoneNumber" class="form-label"></label>
+                    <input asp-for="PhoneNumber" class="form-control" />
+                    <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                </div>
             </div>
-
-            <button type="submit" class="w-100 btn btn-lg btn-primary">Create User</button>
-        </form>
+        </div>
     </div>
-</div>
+
+    <div class="col-md-6">
+        <div class="card shadow-sm" id="teacherSection" style="display: none;">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">3. Teacher Specific Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label asp-for="Designation" class="form-label"></label>
+                    <input asp-for="Designation" class="form-control" placeholder="e.g., Lecturer, Professor" />
+                    <span asp-validation-for="Designation" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm" id="studentSection" style="display: none;">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">3. Student Specific Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="StudentRoll" class="form-label"></label>
+                        <input asp-for="StudentRoll" class="form-control" />
+                        <span asp-validation-for="StudentRoll" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="RegistrationNo" class="form-label"></label>
+                        <input asp-for="RegistrationNo" class="form-control" />
+                        <span asp-validation-for="RegistrationNo" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Session" class="form-label"></label>
+                        <input asp-for="Session" class="form-control" placeholder="e.g., 2020-2021" />
+                        <span asp-validation-for="Session" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="SemesterId" class="form-label"></label>
+                        <select asp-for="SemesterId" asp-items="@Model.SemesterList" class="form-select">
+                            <option value="">-- Select Semester --</option>
+                        </select>
+                        <span asp-validation-for="SemesterId" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="DateOfBirth" class="form-label"></label>
+                        <input asp-for="DateOfBirth" class="form-control" type="date" />
+                        <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="BloodGroup" class="form-label"></label>
+                        <input asp-for="BloodGroup" class="form-control" placeholder="e.g., B+" />
+                        <span asp-validation-for="BloodGroup" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="FatherName" class="form-label"></label>
+                    <input asp-for="FatherName" class="form-control" />
+                    <span asp-validation-for="FatherName" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="MotherName" class="form-label"></label>
+                    <input asp-for="MotherName" class="form-control" />
+                    <span asp-validation-for="MotherName" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Address" class="form-label"></label>
+                    <textarea asp-for="Address" class="form-control" rows="2"></textarea>
+                    <span asp-validation-for="Address" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 mt-4">
+        <button type="submit" class="btn btn-primary">Create User</button>
+        <a asp-action="ListUsers" class="btn btn-secondary">Cancel</a>
+    </div>
+</form>
 
 @section Scripts {
-    <partial name="_ValidationScriptsPartial" />
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script type="text/javascript">
+        // এই কোডটি jQuery ব্যবহার করে কাজ করে
+        $(document).ready(function () {
+
+            // ফাংশন: রোল অনুযায়ী সেকশন দেখানো/লুকানো
+            function toggleSections(selectedRole) {
+                if (selectedRole === "Student") {
+                    $("#studentSection").slideDown(); // স্টুডেন্ট সেকশন দেখাও
+                    $("#teacherSection").slideUp(); // টিচার সেকশন লুকাও
+                } else if (selectedRole === "Teacher") {
+                    $("#studentSection").slideUp();
+                    $("#teacherSection").slideDown();
+                } else {
+                    // যদি কোনো রোল সিলেক্ট না থাকে (যেমন "-- Select Role --")
+                    $("#studentSection").slideUp();
+                    $("#teacherSection").slideUp();
+                }
+            }
+
+            // পেইজ লোড হওয়ার সাথে সাথে একবার চেক করো (যদি ভ্যালিডেশন Error হয়ে পেইজ রি-লোড হয়)
+            var initialRole = $("#roleSelector").val();
+            toggleSections(initialRole);
+
+            // "Role" ড্রপডাউন পরিবর্তন (change) হলে:
+            $("#roleSelector").on("change", function () {
+                var selectedRole = $(this).val(); // বর্তমান সিলেক্টেড ভ্যালু নাও
+                toggleSections(selectedRole); // ফাংশনটি কল করো
+            });
+        });
+    </script>
 }

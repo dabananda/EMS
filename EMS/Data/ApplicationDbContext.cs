@@ -15,6 +15,8 @@ namespace EMS.Data
         public DbSet<Course> Courses { get; set; }
 
         public DbSet<Semester> Semesters { get; set; }
-
+        // --- নতুন এই দুটি লাইন যোগ করো ---
+        public DbSet<StudentProfile> StudentProfiles { get; set; }
+        public DbSet<TeacherProfile> TeacherProfiles { get; set; }
     }
 }
