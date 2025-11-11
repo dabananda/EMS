@@ -1,0 +1,59 @@
+﻿@model EMS.Models.ViewModels.Teacher.TeacherDashboardViewModel
+
+@{
+    ViewData["Title"] = "Teacher Dashboard";
+}
+
+<h1 class="h3 mb-4">Welcome, @Model.Name! 👨‍🏫</h1>
+
+<div class="row">
+    <div class="col-md-5">
+        <div class="card shadow-sm border-info">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="fa-solid fa-user-tie me-2"></i> My Profile</h5>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-3">
+                    <i class="fa-solid fa-chalkboard-user fa-4x text-secondary"></i>
+                </div>
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Designation</dt>
+                    <dd class="col-sm-8 fw-bold text-primary">@Model.Designation</dd>
+
+                    <dt class="col-sm-4">Department</dt>
+                    <dd class="col-sm-8">@Model.Department</dd>
+
+                    <dt class="col-sm-4">Email</dt>
+                    <dd class="col-sm-8 text-break">@Model.Email</dd>
+
+                    <dt class="col-sm-4">Phone</dt>
+                    <dd class="col-sm-8">@Model.Phone</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-7">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <div class="card text-center shadow-sm h-100 border-primary">
+                    <div class="card-body">
+                        <h5 class="card-title text-primary"><i class="fa-solid fa-book-open"></i> Assigned Courses</h5>
+                        <p class="display-4 fw-bold my-2">@Model.TotalAssignedCourses</p>
+                        <a href="#" class="btn btn-sm btn-outline-primary">View Courses (Soon)</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card text-center shadow-sm h-100 border-success">
+                    <div class="card-body">
+                        <h5 class="card-title text-success"><i class="fa-solid fa-check-double"></i> Attendance</h5>
+                        <p class="card-text mt-3">Take attendance for today's classes.</p>
+                        <a href="#" class="btn btn-sm btn-outline-success">Take Attendance (Soon)</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
