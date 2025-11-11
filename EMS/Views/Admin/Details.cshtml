@@ -1,0 +1,91 @@
+﻿@model EMS.Models.ApplicationUser
+
+@{
+    ViewData["Title"] = "User Details";
+}
+
+<h1>User Details</h1>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Basic Info</h5>
+            </div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Full Name</dt>
+                    <dd class="col-sm-8">@Model.FirstName @Model.LastName</dd>
+
+                    <dt class="col-sm-4">Email</dt>
+                    <dd class="col-sm-8">@Model.Email</dd>
+
+                    <dt class="col-sm-4">Phone</dt>
+                    <dd class="col-sm-8">@Model.PhoneNumber</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        @if (Model.StudentProfile != null)
+        {
+            <div class="card mb-4 shadow-sm border-success">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Student Profile</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4">Roll No</dt>
+                        <dd class="col-sm-8">@Model.StudentProfile.StudentRoll</dd>
+
+                        <dt class="col-sm-4">Reg No</dt>
+                        <dd class="col-sm-8">@Model.StudentProfile.RegistrationNo</dd>
+
+                        <dt class="col-sm-4">Department</dt>
+                        <dd class="col-sm-8">@Model.StudentProfile.Department?.Name</dd>
+
+                        <dt class="col-sm-4">Semester</dt>
+                        <dd class="col-sm-8">@Model.StudentProfile.Semester?.Name</dd>
+
+                        <dt class="col-sm-4">Session</dt>
+                        <dd class="col-sm-8">@Model.StudentProfile.Session</dd>
+
+                        <dt class="col-sm-4">Parents</dt>
+                        <dd class="col-sm-8">
+                            F: @Model.StudentProfile.FatherName <br />
+                            M: @Model.StudentProfile.MotherName
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+        }
+        else if (Model.TeacherProfile != null)
+        {
+            <div class="card mb-4 shadow-sm border-info">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Teacher Profile</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4">Designation</dt>
+                        <dd class="col-sm-8">@Model.TeacherProfile.Designation</dd>
+
+                        <dt class="col-sm-4">Department</dt>
+                        <dd class="col-sm-8">@Model.TeacherProfile.Department?.Name</dd>
+                    </dl>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-warning">
+                No specific profile found (Admin or Staff).
+            </div>
+        }
+    </div>
+</div>
+
+<div>
+    <a asp-action="ListUsers" class="btn btn-secondary">Back to List</a>
+</div>

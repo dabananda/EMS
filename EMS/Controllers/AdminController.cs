@@ -164,6 +164,99 @@ namespace EMS.Controllers
             return View(model);
         }
 
+        //Get Details from user
+        // GET: Admin/Details/5
+        public async Task<IActionResult> Details(string id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            // ইউজারকে খুঁজো এবং সাথে তার প্রোফাইল, ডিপার্টমেন্ট ও সেমিস্টার তথ্যও নিয়ে এসো
+            var user = await _context.Users
+                .Include(u => u.StudentProfile)
+                    .ThenInclude(s => s.Department) // স্টুডেন্টের ডিপার্টমেন্ট
+                .Include(u => u.StudentProfile)
+                    .ThenInclude(s => s.Semester)   // স্টুডেন্টের সেমিস্টার
+                .Include(u => u.TeacherProfile)
+                    .ThenInclude(t => t.Department) // টিচারের ডিপার্টমেন্ট
+                .FirstOrDefaultAsync(u => u.Id == id);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            return View(user);
+        }
+
+        //User Delete with confirmation
+        // GET: Admin/Delete/5
+        public async Task<IActionResult> Delete(string id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            // --- সুরক্ষা: নিজের অ্যাকাউন্ট ডিলিট করা যাবে না ---
+            if (id == _userManager.GetUserId(User))
+            {
+                TempData["StatusMessage"] = "Error: You cannot delete your own account!";
+                return RedirectToAction(nameof(ListUsers));
+            }
+
+            // ডিলিট করার আগে ইউজারের সব তথ্য দেখিয়ে কনফার্ম করতে হবে
+            var user = await _context.Users
+                .Include(u => u.StudentProfile)
+                    .ThenInclude(s => s.Department)
+                .Include(u => u.StudentProfile)
+                    .ThenInclude(s => s.Semester)
+                .Include(u => u.TeacherProfile)
+                    .ThenInclude(t => t.Department)
+                .FirstOrDefaultAsync(u => u.Id == id);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            return View(user);
+        }
+
+        // POST: Admin/Delete/5
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(string id)
+        {
+            if (id == _userManager.GetUserId(User))
+            {
+                return RedirectToAction(nameof(ListUsers));
+            }
+
+            var user = await _userManager.FindByIdAsync(id);
+            if (user != null)
+            {
+                // UserManager ব্যবহার করে ডিলিট করলে এটি অটোমেটিকলি রোল এবং প্রোফাইল ডিলিট করবে (যদি Cascade সেট করা থাকে)
+                var result = await _userManager.DeleteAsync(user);
+
+                if (result.Succeeded)
+                {
+                    TempData["SuccessMessage"] = "User deleted successfully!";
+                    return RedirectToAction(nameof(ListUsers));
+                }
+
+                // যদি কোনো কারণে ডিলিট না হয়
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError("", error.Description);
+                }
+            }
+            return RedirectToAction(nameof(ListUsers));
+        }
+
+
         public async Task<IActionResult> ListUsers()
         {
             var users = await _userManager.Users.ToListAsync();

@@ -1,36 +1,60 @@
 ﻿@model IEnumerable<EMS.Models.ViewModels.UserListViewModel>
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<ApplicationUser> UserManager
+
 @{
     ViewData["Title"] = "All Users";
 }
 
-<h1>@ViewData["Title"]</h1>
+<h1>All Users</h1>
 
 <p>
     <a asp-action="CreateUser" class="btn btn-primary">Create New User</a>
 </p>
 
-<table class="table table-striped table-hover">
-    <thead>
-        <tr>
-            <th>
-                Email
-            </th>
-            <th>
-                Roles
-            </th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var user in Model)
-        {
-            <tr>
-                <td>
-                    @user.Email
-                </td>
-                <td>
-                    @user.Roles
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <table class="table table-striped mb-0">
+            <thead class="bg-light">
+                <tr>
+                    <th>Email</th>
+                    <th>Roles</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in Model)
+                {
+                    <tr>
+                        <td>@user.Email</td>
+                        <td>
+                            <span class="badge bg-info text-dark">@user.Roles</span>
+                        </td>
+                        <td class="text-end">
+                            <div class="btn-group" role="group">
+                                <a asp-action="Details" asp-route-id="@user.UserId" class="btn btn-outline-primary btn-sm">
+                                    <i class="fa-solid fa-circle-info"></i> Details
+                                </a>
+                                <a asp-action="Edit" asp-route-id="@user.UserId" class="btn btn-outline-warning btn-sm">
+                                    <i class="fa-solid fa-pen-to-square"></i> Edit
+                                </a>
+                                @if (user.UserId != UserManager.GetUserId(User))
+                                    {
+                                        <a asp-action="Delete" asp-route-id="@user.UserId" class="btn btn-outline-danger btn-sm">
+                                            <i class="fa-solid fa-trash"></i> Delete
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <button class="btn btn-outline-secondary btn-sm" disabled>
+                                            <i class="fa-solid fa-user-shield"></i> You
+                                        </button>
+                                    }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
