@@ -87,5 +87,5 @@
 </div>
 
 <div>
-    <a asp-action="ListUsers" class="btn btn-secondary">Back to List</a>
+    <a asp-action="@(ViewData["Source"]?.ToString() ?? "ListUsers")" class="btn btn-secondary">Back to List</a>
 </div>

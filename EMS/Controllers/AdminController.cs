@@ -166,7 +166,7 @@ namespace EMS.Controllers
 
         //Get Details from user. It's for user managment 
         // GET: Admin/Details/5
-        public async Task<IActionResult> Details(string id)
+        public async Task<IActionResult> Details(string id, string source)
         {
             if (id == null)
             {
@@ -188,12 +188,13 @@ namespace EMS.Controllers
                 return NotFound();
             }
 
+            ViewData["Source"] = source; // যেখানে থেকে ডিটেইলস পেজে এসেছি তা ধরে রাখো
             return View(user);
         }
 
         //User Delete with confirmation. It's for users managment.
         // GET: Admin/Delete/5
-        public async Task<IActionResult> Delete(string id)
+        public async Task<IActionResult> Delete(string id, string source)
         {
             if (id == null)
             {
@@ -222,13 +223,14 @@ namespace EMS.Controllers
                 return NotFound();
             }
 
+            ViewData["Source"] = source; // যেখানে থেকে ডিলিট পেজে এসেছি তা ধরে রাখো
             return View(user);
         }
 
         // POST: Admin/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(string id)
+        public async Task<IActionResult> DeleteConfirmed(string id, string source)
         {
             if (id == _userManager.GetUserId(User))
             {
@@ -253,13 +255,15 @@ namespace EMS.Controllers
                     ModelState.AddModelError("", error.Description);
                 }
             }
+            if (source == "Students") return RedirectToAction(nameof(Students));
+            if (source == "Teachers") return RedirectToAction(nameof(Teachers));
             return RedirectToAction(nameof(ListUsers));
         }
 
 
         //User edit option added for user managment.
         // GET: Admin/Edit/5
-        public async Task<IActionResult> Edit(string id)
+        public async Task<IActionResult> Edit(string id, string source)
         {
             if (id == null) return NotFound();
 
@@ -310,13 +314,14 @@ namespace EMS.Controllers
                 model.Designation = user.TeacherProfile.Designation;
             }
 
+            ViewData["Source"] = source; // যেখানে থেকে এডিট পেজে এসেছি তা ধরে রাখো
             return View(model);
         }
 
         // POST: Admin/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string id, EditUserViewModel model)
+        public async Task<IActionResult> Edit(string id, EditUserViewModel model, string source)
         {
             if (id != model.Id) return NotFound();
 
@@ -382,12 +387,15 @@ namespace EMS.Controllers
                 await _context.SaveChangesAsync(); // প্রোফাইল টেবিল আপডেট
 
                 TempData["SuccessMessage"] = "User updated successfully!";
+                if (source == "Students") return RedirectToAction(nameof(Students));
+                if (source == "Teachers") return RedirectToAction(nameof(Teachers));
                 return RedirectToAction(nameof(ListUsers));
             }
 
             // Error হলে ড্রপডাউন আবার পাঠাও
             model.DepartmentList = new SelectList(await _context.Departments.ToListAsync(), "Id", "Name", model.DepartmentId);
             model.SemesterList = new SelectList(await _context.Semesters.ToListAsync(), "Id", "Name", model.SemesterId);
+            ViewData["Source"] = source;
             return View(model);
         }
 

@@ -44,9 +44,9 @@
 <div class="mt-3">
     <form asp-action="Delete">
         <input type="hidden" asp-for="Id" />
-        <button type="submit" class="btn btn-danger">
+        <input type="hidden" name="source" value="@ViewData["Source"]" /> <button type="submit" class="btn btn-danger">
             <i class="fa-solid fa-trash"></i> Confirm Delete
         </button>
-        <a asp-action="ListUsers" class="btn btn-secondary">Cancel</a>
+        <a asp-action="@(ViewData["Source"]?.ToString() ?? "ListUsers")" class="btn btn-secondary">Cancel</a>
     </form>
 </div>

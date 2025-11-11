@@ -94,9 +94,9 @@
                         <td>@student.PhoneNumber</td>
                         <td class="text-end">
                             <div class="btn-group btn-group-sm">
-                                <a asp-action="Details" asp-route-id="@student.Id" class="btn btn-outline-info" title="Details"><i class="fa-solid fa-eye"></i></a>
-                                <a asp-action="Edit" asp-route-id="@student.Id" class="btn btn-outline-warning" title="Edit"><i class="fa-solid fa-pen"></i></a>
-                                <a asp-action="Delete" asp-route-id="@student.Id" class="btn btn-outline-danger" title="Delete"><i class="fa-solid fa-trash"></i></a>
+                                <a asp-action="Details" asp-route-id="@student.Id" asp-route-source="Students" class="btn btn-outline-info" title="Details"><i class="fa-solid fa-eye"></i></a>
+                                <a asp-action="Edit" asp-route-id="@student.Id" asp-route-source="Students" class="btn btn-outline-warning" title="Edit"><i class="fa-solid fa-pen"></i></a>
+                                <a asp-action="Delete" asp-route-id="@student.Id" asp-route-source="Students" class="btn btn-outline-danger" title="Delete"><i class="fa-solid fa-trash"></i></a>
                             </div>
                         </td>
                     </tr>
