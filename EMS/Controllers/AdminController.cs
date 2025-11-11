@@ -39,7 +39,7 @@ namespace EMS.Controllers
         }
 
         // --- CreateUser (GET) মেথডটি রিপ্লেস করো ---
-        public async Task<IActionResult> CreateUser()
+        public async Task<IActionResult> CreateUser(string source)
         {
             // ড্রপডাউনের জন্য সব ডেটা লোড করো
             var roles = await _roleManager.Roles
@@ -55,13 +55,15 @@ namespace EMS.Controllers
                 DepartmentList = new SelectList(departments, "Id", "Name"),
                 SemesterList = new SelectList(semesters, "Id", "Name")
             };
+
+            ViewData["Source"] = source; // যেখানে থেকে ক্রিয়েট পেজে এসেছি তা ধরে রাখো
             return View(model);
         }
 
         // --- CreateUser (POST) মেথডটি রিপ্লেস করো ---
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreateUser(CreateUserViewModel model)
+        public async Task<IActionResult> CreateUser(CreateUserViewModel model, string source)
         {
             // ম্যানুয়ালি ভ্যালিডেশন চেক (রোল অনুযায়ী)
             if (model.Role == "Student")
@@ -142,6 +144,10 @@ namespace EMS.Controllers
                     await _context.SaveChangesAsync(); // প্রোফাইল সেভ করো
 
                     TempData["SuccessMessage"] = "User created successfully!";
+
+                    // ক্রিয়েট করার পর যেখানে থেকে এসেছি সেখানে রিডাইরেক্ট করো
+                    if (source == "Students") return RedirectToAction(nameof(Students));
+                    if (source == "Teachers") return RedirectToAction(nameof(Teachers));
                     return RedirectToAction("ListUsers"); // সফল হলে ইউজার লিস্টে পাঠাও
                 }
                 foreach (var error in result.Errors)
@@ -161,6 +167,7 @@ namespace EMS.Controllers
             model.DepartmentList = new SelectList(departments, "Id", "Name", model.DepartmentId);
             model.SemesterList = new SelectList(semesters, "Id", "Name", model.SemesterId);
 
+            ViewData["Source"] = source;// যেখানে থেকে ক্রিয়েট পেজে এসেছি তা ধরে রাখো
             return View(model);
         }
 
@@ -246,6 +253,8 @@ namespace EMS.Controllers
                 if (result.Succeeded)
                 {
                     TempData["SuccessMessage"] = "User deleted successfully!";
+                    if (source == "Students") return RedirectToAction(nameof(Students));
+                    if (source == "Teachers") return RedirectToAction(nameof(Teachers));
                     return RedirectToAction(nameof(ListUsers));
                 }
 
@@ -255,8 +264,6 @@ namespace EMS.Controllers
                     ModelState.AddModelError("", error.Description);
                 }
             }
-            if (source == "Students") return RedirectToAction(nameof(Students));
-            if (source == "Teachers") return RedirectToAction(nameof(Teachers));
             return RedirectToAction(nameof(ListUsers));
         }
 
