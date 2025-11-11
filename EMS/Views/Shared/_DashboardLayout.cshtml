@@ -37,54 +37,80 @@
 
                     <ul class="nav flex-column">
 
-                        <li class="nav-item">
-                            <a class="nav-link @(currentController == "Admin" && currentAction == "Index" ? "active" : "")"
-                               asp-controller="Admin" asp-action="Index">
-                                <i class="fa-solid fa-house me-2"></i> Dashboard
-                            </a>
-                        </li>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link @(currentController == "Admin" && currentAction == "Index" ? "active" : "")"
+                                   asp-controller="Admin" asp-action="Index">
+                                    <i class="fa-solid fa-house me-2"></i> Dashboard
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link @(currentController == "Departments" ? "active" : "")"
+                                   asp-controller="Departments" asp-action="Index">
+                                    <i class="fa-solid fa-building-columns me-2"></i> Departments
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link @(currentController == "Semesters" ? "active" : "")"
+                                   asp-controller="Semesters" asp-action="Index">
+                                    <i class="fa-solid fa-layer-group me-2"></i> Semesters
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link @(currentController == "Courses" ? "active" : "")"
+                                   asp-controller="Courses" asp-action="Index">
+                                    <i class="fa-solid fa-book me-2"></i> Courses
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link @(currentController == "Admin" && currentAction == "Students" ? "active" : "")"
+                                   asp-controller="Admin" asp-action="Students">
+                                    <i class="fa-solid fa-user-graduate me-2"></i> Students
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link @(currentController == "Admin" && currentAction == "Teachers" ? "active" : "")"
+                                   asp-controller="Admin" asp-action="Teachers">
+                                    <i class="fa-solid fa-chalkboard-user me-2"></i> Teachers
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link @(currentController == "Admin" && currentAction == "ListUsers" ? "active" : "")"
+                                   asp-controller="Admin" asp-action="ListUsers">
+                                    <i class="fa-solid fa-users me-2"></i> Manage Users
+                                </a>
+                            </li>
+                        }
 
-                        <li class="nav-item">
-                            <a class="nav-link @(currentController == "Departments" ? "active" : "")"
-                               asp-controller="Departments" asp-action="Index">
-                                <i class="fa-solid fa-building-columns me-2"></i> Departments
-                            </a>
-                        </li>
+                        @if (User.IsInRole("Student"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link @(currentController == "Student" && currentAction == "Index" ? "active" : "")"
+                                   asp-controller="Student" asp-action="Index">
+                                    <i class="fa-solid fa-house me-2"></i> My Dashboard
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#">
+                                    <i class="fa-solid fa-book-open me-2"></i> My Courses (Soon)
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#">
+                                    <i class="fa-solid fa-square-poll-vertical me-2"></i> Results (Soon)
+                                </a>
+                            </li>
+                        }
 
-                        <li class="nav-item">
-                            <a class="nav-link @(currentController == "Semesters" ? "active" : "")"
-                               asp-controller="Semesters" asp-action="Index">
-                                <i class="fa-solid fa-layer-group me-2"></i> Semesters
-                            </a>
-                        </li>
-
-                        <li class="nav-item">
-                            <a class="nav-link @(currentController == "Courses" ? "active" : "")"
-                               asp-controller="Courses" asp-action="Index">
-                                <i class="fa-solid fa-book me-2"></i> Courses
-                            </a>
-                        </li>
-
-                        <li class="nav-item">
-                            <a class="nav-link @(currentController == "Admin" && currentAction == "Students" ? "active" : "")"
-                               asp-controller="Admin" asp-action="Students">
-                                <i class="fa-solid fa-user-graduate me-2"></i> Students
-                            </a>
-                        </li>
-
-                        <li class="nav-item">
-                            <a class="nav-link @(currentController == "Admin" && currentAction == "Teachers" ? "active" : "")"
-                               asp-controller="Admin" asp-action="Teachers">
-                                <i class="fa-solid fa-chalkboard-user me-2"></i> Teachers
-                            </a>
-                        </li>
-
-                        <li class="nav-item">
-                            <a class="nav-link @(currentController == "Admin" && currentAction == "ListUsers" ? "active" : "")"
-                               asp-controller="Admin" asp-action="ListUsers">
-                                <i class="fa-solid fa-users me-2"></i> Manage Users
-                            </a>
-                        </li>
+                        @if (User.IsInRole("Teacher"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" href="#">
+                                    <i class="fa-solid fa-house me-2"></i> Teacher Dashboard
+                                </a>
+                            </li>
+                        }
 
                     </ul>
                 </div>

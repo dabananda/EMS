@@ -1,0 +1,46 @@
+﻿@model EMS.Models.ApplicationUser
+
+@{
+    ViewData["Title"] = "Student Dashboard";
+}
+
+<h1 class="h3 mb-3">Welcome, @Model.FirstName! 👋</h1>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card shadow-sm border-primary">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fa-solid fa-id-card me-2"></i> My Profile</h5>
+            </div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Name</dt>
+                    <dd class="col-sm-8">@Model.FirstName @Model.LastName</dd>
+
+                    <dt class="col-sm-4">Student ID</dt>
+                    <dd class="col-sm-8">@Model.StudentProfile?.StudentRoll</dd>
+
+                    <dt class="col-sm-4">Department</dt>
+                    <dd class="col-sm-8">@Model.StudentProfile?.Department?.Name</dd>
+
+                    <dt class="col-sm-4">Current Semester</dt>
+                    <dd class="col-sm-8"><span class="badge bg-success">@Model.StudentProfile?.Semester?.Name</span></dd>
+
+                    <dt class="col-sm-4">Session</dt>
+                    <dd class="col-sm-8">@Model.StudentProfile?.Session</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fa-solid fa-bell me-2"></i> Recent Notices</h5>
+            </div>
+            <div class="card-body text-muted text-center py-5">
+                <p>No new notices published yet.</p>
+            </div>
+        </div>
+    </div>
+</div>
