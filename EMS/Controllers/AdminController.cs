@@ -590,5 +590,75 @@ namespace EMS.Controllers
             return RedirectToAction("ManageAttendance", new { courseId = model.CourseId, date = model.Date });
         }
 
+        // Admin এর জন্য এক্সাম ম্যানেজমেন্ট 
+        // GET: Admin/ManageExams
+        public async Task<IActionResult> ManageExams(string searchString, int? courseId, ExamType? examType)
+        {
+            // ১. এক্সাম ডেটা লোড করো (কোর্স, ডিপার্টমেন্ট, সেমিস্টার, টিচার সহ)
+            var examsQuery = _context.Exams
+                .Include(e => e.Course)
+                    .ThenInclude(c => c.Department)
+                .Include(e => e.Course)
+                    .ThenInclude(c => c.Semester)
+                .Include(e => e.Course)
+                    .ThenInclude(c => c.Teacher) // কে পরীক্ষা নিয়েছে দেখার জন্য
+                .AsQueryable();
+
+            // ২. ফিল্টার: নাম দিয়ে সার্চ
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                examsQuery = examsQuery.Where(e => e.Title.Contains(searchString) || e.Course.CourseCode.Contains(searchString));
+            }
+
+            // ৩. ফিল্টার: কোর্স অনুযায়ী
+            if (courseId.HasValue)
+            {
+                examsQuery = examsQuery.Where(e => e.CourseId == courseId);
+            }
+
+            // ৪. ফিল্টার: এক্সামের ধরন (Midterm/Final etc)
+            if (examType.HasValue)
+            {
+                examsQuery = examsQuery.Where(e => e.ExamType == examType);
+            }
+
+            // ড্রপডাউন ডেটা
+            ViewBag.CourseList = new SelectList(_context.Courses, "Id", "CourseCode", courseId);
+            ViewData["CurrentFilter"] = searchString;
+
+            // লেটেস্ট এক্সাম আগে দেখাবে
+            var exams = await examsQuery.OrderByDescending(e => e.ExamDate).ToListAsync();
+            return View(exams);
+        }
+
+        // GET: Admin/ExamResults/5
+        public async Task<IActionResult> ExamResults(int? id)
+        {
+            if (id == null) return NotFound();
+
+            // ১. এক্সাম ইনফো
+            var exam = await _context.Exams
+                .Include(e => e.Course)
+                    .ThenInclude(c => c.Department)
+                .Include(e => e.Course)
+                    .ThenInclude(c => c.Semester)
+                .FirstOrDefaultAsync(e => e.Id == id);
+
+            if (exam == null) return NotFound();
+
+            // ২. রেজাল্ট এবং স্টুডেন্ট ইনফো লোড করো
+            var results = await _context.ExamResults
+                .Include(r => r.Student)
+                    .ThenInclude(s => s.StudentProfile)
+                .Where(r => r.ExamId == id)
+                .OrderBy(r => r.Student.StudentProfile.StudentRoll) // রোল অনুযায়ী সাজানো
+                .ToListAsync();
+
+            // ৩. ভিউতে পাঠানোর জন্য ViewBag ব্যবহার করছি (অথবা আলাদা ViewModel বানাতে পারো)
+            ViewBag.Exam = exam;
+
+            return View(results);
+        }
+
     }
 }

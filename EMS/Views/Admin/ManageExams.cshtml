@@ -1,5 +1,99 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model IEnumerable<EMS.Models.Exam>
+
 @{
+    ViewData["Title"] = "Exam List";
 }
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="text-primary"><i class="fa-solid fa-file-signature"></i> Exam Monitoring</h2>
+</div>
+
+<div class="card shadow-sm mb-4 bg-light">
+    <div class="card-body py-3">
+        <form method="get" asp-action="ManageExams" class="row g-3 align-items-end">
+
+            <div class="col-md-4">
+                <label class="form-label fw-bold small">Search</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-white"><i class="fa-solid fa-magnifying-glass"></i></span>
+                    <input type="text" name="searchString" value="@ViewData["CurrentFilter"]" class="form-control" placeholder="Exam Title or Course Code..." />
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label fw-bold small">Exam Type</label>
+                <select name="examType" class="form-select" asp-items="Html.GetEnumSelectList<EMS.Models.ExamType>()">
+                    <option value="">-- All Types --</option>
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label fw-bold small">Course</label>
+                <select name="courseId" class="form-select" asp-items="ViewBag.CourseList">
+                    <option value="">-- All Courses --</option>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fa-solid fa-filter"></i> Filter
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0 align-middle">
+            <thead class="bg-light">
+                <tr>
+                    <th>Exam Title</th>
+                    <th>Course Info</th>
+                    <th>Teacher</th>
+                    <th>Date</th>
+                    <th>Type</th>
+                    <th class="text-end">Results</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Any())
+                {
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="fw-bold text-primary">@item.Title</td>
+                            <td>
+                                <span class="fw-bold">@item.Course.CourseCode</span> <br />
+                                <small class="text-muted">@item.Course.Department?.Name</small>
+                            </td>
+                            <td>
+                                @if (item.Course.Teacher != null)
+                                {
+                                    <span>@item.Course.Teacher.FirstName @item.Course.Teacher.LastName</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">N/A</span>
+                                }
+                            </td>
+                            <td>@item.ExamDate.ToString("dd MMM yyyy")</td>
+                            <td><span class="badge bg-info text-dark">@item.ExamType</span></td>
+                            <td class="text-end">
+                                <a asp-action="ExamResults" asp-route-id="@item.Id" class="btn btn-sm btn-outline-success">
+                                    <i class="fa-solid fa-square-poll-vertical"></i> View Results
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-5">No exams found matching criteria.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
