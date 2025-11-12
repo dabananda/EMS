@@ -39,5 +39,31 @@ namespace EMS.Controllers
 
             return View(student);
         }
+
+        //My Couse section showing all assign course.
+        // GET: Student/MyCourses
+        public async Task<IActionResult> MyCourses()
+        {
+            var userId = _userManager.GetUserId(User);
+
+            // ১. স্টুডেন্টের প্রোফাইল থেকে তার ডিপার্টমেন্ট ও সেমিস্টার জানো
+            var student = await _context.Users
+                .Include(u => u.StudentProfile)
+                .FirstOrDefaultAsync(u => u.Id == userId);
+
+            if (student == null || student.StudentProfile == null)
+            {
+                return NotFound(); // অথবা এরর পেজে পাঠাতে পারো
+            }
+
+            // ২. সেই ডিপার্টমেন্ট ও সেমিস্টারের কোর্সগুলো খুঁজে বের করো (সাথে টিচারের নাম)
+            var myCourses = await _context.Courses
+                .Include(c => c.Teacher) // টিচারের নাম দেখানোর জন্য
+                .Where(c => c.DepartmentId == student.StudentProfile.DepartmentId &&
+                            c.SemesterId == student.StudentProfile.SemesterId)
+                .ToListAsync();
+
+            return View(myCourses);
+        }
     }
 }
