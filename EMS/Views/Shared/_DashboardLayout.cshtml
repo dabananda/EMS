@@ -136,6 +136,13 @@
                             </li>
 
                             <li class="nav-item">
+                                <a class="nav-link @(currentController == "Teacher" && currentAction == "MyStudents" ? "active" : "")"
+                                   asp-controller="Teacher" asp-action="MyStudents">
+                                    <i class="fa-solid fa-user-graduate me-2"></i> My Students
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
                                 <a class="nav-link @(currentController == "Teacher" && (currentAction == "Notices" || currentAction == "NoticeDetails") ? "active" : "")"
                                    asp-controller="Teacher" asp-action="Notices">
                                     <i class="fa-solid fa-bullhorn me-2"></i> Notices
@@ -143,8 +150,9 @@
                             </li>
 
                             <li class="nav-item">
-                                <a class="nav-link" href="#">
-                                    <i class="fa-solid fa-check-double me-2"></i> Attendance (Soon)
+                                <a class="nav-link @(currentController == "Teacher" && currentAction == "Attendance" ? "active" : "")"
+                                   asp-controller="Teacher" asp-action="Attendance">
+                                    <i class="fa-solid fa-check-double me-2"></i> Attendance
                                 </a>
                             </li>
                         }

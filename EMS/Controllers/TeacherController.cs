@@ -4,6 +4,7 @@ using EMS.Models.ViewModels.Teacher; // <--- নতুন ViewModel-এর র�
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace EMS.Controllers
@@ -140,64 +141,88 @@ namespace EMS.Controllers
         }
 
         //Take Attendance Section for students
-        // GET: Teacher/TakeAttendance/5
-        public async Task<IActionResult> TakeAttendance(int courseId)
+        // GET: Teacher/Attendance
+        public async Task<IActionResult> Attendance(int? courseId, DateTime? date)
         {
-            var course = await _context.Courses
-                .Include(c => c.Department)
-                .Include(c => c.Semester)
-                .FirstOrDefaultAsync(c => c.Id == courseId);
-
-            if (course == null) return NotFound();
-
-            // সিকিউরিটি চেক: টিচার কি এই কোর্সের?
             var userId = _userManager.GetUserId(User);
-            if (course.TeacherId != userId) return RedirectToAction("AccessDenied", "Account");
+            var attendanceDate = date ?? DateTime.Now; // তারিখ না দিলে আজকের তারিখ
 
-            // ওই সেমিস্টার ও ডিপার্টমেন্টের স্টুডেন্টদের লোড করো
+            // ১. টিচারের সব কোর্স লোড করো (ড্রপডাউনের জন্য)
+            var courses = await _context.Courses
+                .Include(c => c.Semester)
+                .Where(c => c.TeacherId == userId)
+                .ToListAsync();
+
+            // ড্রপডাউন লিস্ট তৈরি
+            // আমরা কোর্সের নামের সাথে সেমিস্টারও দেখাচ্ছি যাতে টিচার সহজে চিনতে পারে
+            ViewBag.CourseList = new SelectList(courses.Select(c => new {
+                Id = c.Id,
+                Title = $"{c.Title} ({c.CourseCode}) - {c.Semester?.Name}"
+            }), "Id", "Title", courseId);
+
+            // ২. যদি কোনো কোর্স সিলেক্ট করা না থাকে, তবে ফাঁকা ভিউ রিটার্ন করো
+            if (courseId == null)
+            {
+                return View(new AttendanceViewModel { Date = attendanceDate });
+            }
+
+            // ৩. কোর্স সিলেক্ট করা থাকলে স্টুডেন্ট লোড করো
+            var selectedCourse = courses.FirstOrDefault(c => c.Id == courseId);
+            if (selectedCourse == null) return NotFound();
+
             var students = await _context.Users
                 .Include(u => u.StudentProfile)
                 .Where(u => u.StudentProfile != null &&
-                            u.StudentProfile.DepartmentId == course.DepartmentId &&
-                            u.StudentProfile.SemesterId == course.SemesterId)
-                .OrderBy(u => u.StudentProfile.StudentRoll) // রোল অনুযায়ী সাজানো
+                            u.StudentProfile.DepartmentId == selectedCourse.DepartmentId &&
+                            u.StudentProfile.SemesterId == selectedCourse.SemesterId)
+                .OrderBy(u => u.StudentProfile.StudentRoll)
                 .ToListAsync();
 
-            // ViewModel তৈরি করো
+            // ৪. আগের কোনো অ্যাটেনডেন্স আছে কিনা চেক করো
+            var existingAttendance = await _context.StudentAttendances
+                .Where(a => a.CourseId == courseId && a.Date.Date == attendanceDate.Date)
+                .ToListAsync();
+
+            // ৫. ViewModel তৈরি করো
             var model = new AttendanceViewModel
             {
-                CourseId = course.Id,
-                CourseTitle = course.Title,
-                CourseCode = course.CourseCode,
-                Date = DateTime.Now,
-                Students = students.Select(s => new StudentAttendanceRow
-                {
-                    StudentId = s.Id,
-                    StudentName = $"{s.FirstName} {s.LastName}",
-                    RollNo = s.StudentProfile.StudentRoll,
-                    Status = AttendanceStatus.Present // ডিফল্ট সবাই উপস্থিত
+                CourseId = selectedCourse.Id,
+                CourseTitle = selectedCourse.Title,
+                CourseCode = selectedCourse.CourseCode,
+                Date = attendanceDate,
+                Students = students.Select(s => {
+                    // যদি আগে অ্যাটেনডেন্স নেওয়া থাকে, সেটা লোড করো
+                    var record = existingAttendance.FirstOrDefault(a => a.StudentId == s.Id);
+                    return new StudentAttendanceRow
+                    {
+                        StudentId = s.Id,
+                        StudentName = $"{s.FirstName} {s.LastName}",
+                        RollNo = s.StudentProfile.StudentRoll,
+                        Status = record != null ? record.Status : AttendanceStatus.Present // ডিফল্ট Present
+                    };
                 }).ToList()
             };
 
             return View(model);
         }
 
-        // POST: Teacher/TakeAttendance
+        // POST: Teacher/Attendance
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> TakeAttendance(AttendanceViewModel model)
+        public async Task<IActionResult> Attendance(AttendanceViewModel model)
         {
-            // ১. চেক করো আজকের অ্যাটেনডেন্স ইতিমধ্যে নেওয়া হয়েছে কিনা
-            var exists = await _context.StudentAttendances
-                .AnyAsync(a => a.CourseId == model.CourseId && a.Date.Date == model.Date.Date);
+            // ১. আগের রেকর্ড ডিলিট করো (যাতে এডিট করলে ডুপ্লিকেট না হয়)
+            // এটি সহজ পদ্ধতি: আগে মুছে ফেলে নতুন করে সেভ করা
+            var existingRecords = await _context.StudentAttendances
+                .Where(a => a.CourseId == model.CourseId && a.Date.Date == model.Date.Date)
+                .ToListAsync();
 
-            if (exists)
+            if (existingRecords.Any())
             {
-                ModelState.AddModelError("", "Attendance for this date already exists!");
-                return View(model);
+                _context.StudentAttendances.RemoveRange(existingRecords);
             }
 
-            // ২. ডেটাবেসে সেভ করো
+            // ২. নতুন রেকর্ড সেভ করো
             foreach (var item in model.Students)
             {
                 var attendance = new StudentAttendance
@@ -211,8 +236,89 @@ namespace EMS.Controllers
             }
 
             await _context.SaveChangesAsync();
+
             TempData["SuccessMessage"] = "Attendance saved successfully!";
-            return RedirectToAction("MyCourses");
+
+            // সেভ করার পর ওই পেজেই থাকো
+            return RedirectToAction("Attendance", new { courseId = model.CourseId, date = model.Date });
+        }
+
+        //Student list based on department semester and courselist
+        // GET: Teacher/MyStudents
+        public async Task<IActionResult> MyStudents(int? courseId, int? semesterId)
+        {
+            var userId = _userManager.GetUserId(User);
+
+            // ১. টিচারের সব কোর্স লোড করো (ফিল্টার ড্রপডাউনের জন্য)
+            var teacherCourses = await _context.Courses
+                .Include(c => c.Department)
+                .Include(c => c.Semester)
+                .Where(c => c.TeacherId == userId)
+                .ToListAsync();
+
+            // ২. ড্রপডাউন পপুলেট করা
+            ViewBag.CourseList = new SelectList(teacherCourses, "Id", "Title", courseId);
+
+            // সেমিস্টার লিস্ট (শুধু টিচারের কোর্সের সেমিস্টারগুলো)
+            var teacherSemesters = teacherCourses.Select(c => c.Semester).DistinctBy(s => s.Id).ToList();
+            ViewBag.SemesterList = new SelectList(teacherSemesters, "Id", "Name", semesterId);
+
+            // ৩. স্টুডেন্ট খোঁজার লজিক
+            // টিচারের কোর্সের ডিপার্টমেন্ট এবং সেমিস্টারের তালিকা নাও
+            var allowedDeptSemesters = teacherCourses
+                .Select(c => new { c.DepartmentId, c.SemesterId })
+                .Distinct()
+                .ToList();
+
+            var studentsQuery = _context.Users
+                .Include(u => u.StudentProfile)
+                    .ThenInclude(sp => sp.Department)
+                .Include(u => u.StudentProfile)
+                    .ThenInclude(sp => sp.Semester)
+                .Where(u => u.StudentProfile != null) // শুধু স্টুডেন্ট
+                .AsQueryable();
+
+            // ৪. ফিল্টারিং লজিক
+            if (courseId.HasValue)
+            {
+                // যদি নির্দিষ্ট কোর্স সিলেক্ট করা থাকে
+                var selectedCourse = teacherCourses.FirstOrDefault(c => c.Id == courseId);
+                if (selectedCourse != null)
+                {
+                    studentsQuery = studentsQuery.Where(s =>
+                        s.StudentProfile.DepartmentId == selectedCourse.DepartmentId &&
+                        s.StudentProfile.SemesterId == selectedCourse.SemesterId);
+                }
+            }
+            else if (semesterId.HasValue)
+            {
+                // যদি শুধু সেমিস্টার সিলেক্ট করা থাকে (টিচারের সেই সেমিস্টারের সব কোর্সের স্টুডেন্ট)
+                // তবে অবশ্যই টিচারের ডিপার্টমেন্টের হতে হবে
+                var validDepts = teacherCourses
+                    .Where(c => c.SemesterId == semesterId)
+                    .Select(c => c.DepartmentId)
+                    .ToList();
+
+                studentsQuery = studentsQuery.Where(s =>
+                    s.StudentProfile.SemesterId == semesterId &&
+                    validDepts.Contains(s.StudentProfile.DepartmentId));
+            }
+            else
+            {
+                // কোনো ফিল্টার না থাকলে: টিচারের সব কোর্সের সব স্টুডেন্ট দেখাও
+                // এটি একটু জটিল কুয়েরি, তাই মেমোরিতে এনে ফিল্টার করছি (সহজ করার জন্য)
+                var allStudents = await studentsQuery.ToListAsync();
+
+                var myStudents = allStudents.Where(s =>
+                    allowedDeptSemesters.Any(x =>
+                        x.DepartmentId == s.StudentProfile.DepartmentId &&
+                        x.SemesterId == s.StudentProfile.SemesterId
+                    )).ToList();
+
+                return View(myStudents);
+            }
+
+            return View(await studentsQuery.ToListAsync());
         }
     }
 }

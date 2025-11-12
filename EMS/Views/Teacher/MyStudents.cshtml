@@ -1,0 +1,91 @@
+﻿@model IEnumerable<EMS.Models.ApplicationUser>
+
+@{
+    ViewData["Title"] = "My Students";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="text-primary"><i class="fa-solid fa-users-viewfinder"></i> My Students</h2>
+</div>
+
+<div class="card shadow-sm mb-4 bg-light">
+    <div class="card-body py-3">
+        <form method="get" asp-action="MyStudents" class="row g-3 align-items-end">
+
+            <div class="col-md-4">
+                <label class="form-label fw-bold small">Filter by Course</label>
+                <select name="courseId" class="form-select" asp-items="ViewBag.CourseList" onchange="this.form.submit()">
+                    <option value="">-- All Courses --</option>
+                </select>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label fw-bold small">Filter by Semester</label>
+                <select name="semesterId" class="form-select" asp-items="ViewBag.SemesterList" onchange="this.form.submit()">
+                    <option value="">-- All Semesters --</option>
+                </select>
+            </div>
+
+            <div class="col-md-4 text-end">
+                <a asp-action="MyStudents" class="btn btn-outline-secondary w-100">
+                    <i class="fa-solid fa-rotate-right"></i> Reset Filter
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header bg-white">
+        <h5 class="mb-0 text-muted">Total Students Found: <span class="badge bg-primary">@Model.Count()</span></h5>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover mb-0 align-middle">
+            <thead class="bg-light">
+                <tr>
+                    <th>Roll No</th>
+                    <th>Name</th>
+                    <th>Department</th>
+                    <th>Semester</th>
+                    <th>Contact</th>
+                    <th class="text-end">Profile</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Any())
+                {
+                    @foreach (var student in Model)
+                    {
+                        <tr>
+                            <td class="fw-bold">@student.StudentProfile?.StudentRoll</td>
+                            <td>
+                                @student.FirstName @student.LastName
+                                <div class="small text-muted">@student.StudentProfile?.RegistrationNo</div>
+                            </td>
+                            <td>@student.StudentProfile?.Department?.Name</td>
+                            <td><span class="badge bg-info text-dark">@student.StudentProfile?.Semester?.Name</span></td>
+                            <td>
+                                <i class="fa-solid fa-phone small text-muted"></i> @student.PhoneNumber <br>
+                                <i class="fa-solid fa-envelope small text-muted"></i> @student.Email
+                            </td>
+                            <td class="text-end">
+                                <button class="btn btn-sm btn-outline-info" title="View Profile (Soon)">
+                                    <i class="fa-solid fa-user"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-5">
+                            <i class="fa-solid fa-user-slash fa-2x mb-3"></i>
+                            <p class="mb-0">No students found matching criteria.</p>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
