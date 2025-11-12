@@ -168,5 +168,54 @@ namespace EMS.Controllers
         {
             return _context.Courses.Any(e => e.Id == id);
         }
+
+
+
+        // GET: Courses/AssignTeacher/5
+        public async Task<IActionResult> AssignTeacher(int? id)
+        {
+            if (id == null) return NotFound();
+
+            var course = await _context.Courses
+                .Include(c => c.Department)
+                .Include(c => c.Semester)
+                .Include(c => c.Teacher) // বর্তমান টিচারকে লোড করো
+                .FirstOrDefaultAsync(m => m.Id == id);
+
+            if (course == null) return NotFound();
+
+            // শুধুমাত্র ওই ডিপার্টমেন্টের টিচারদের লিস্ট তৈরি করো
+            var teachers = await _context.Users
+                .Include(u => u.TeacherProfile)
+                .Where(u => u.TeacherProfile != null && u.TeacherProfile.DepartmentId == course.DepartmentId) // লজিক: অন্য ডিপার্টমেন্টের টিচার অ্যাসাইন করা যাবে না
+                .Select(u => new {
+                    Id = u.Id,
+                    Name = u.FirstName + " " + u.LastName + " (" + u.TeacherProfile.Designation + ")"
+                })
+                .ToListAsync();
+
+            ViewData["TeacherId"] = new SelectList(teachers, "Id", "Name", course.TeacherId);
+
+            return View(course);
+        }
+
+
+        // POST: Courses/AssignTeacher/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AssignTeacher(int id, string? TeacherId)
+        {
+            var course = await _context.Courses.FindAsync(id);
+            if (course == null) return NotFound();
+
+            // টিচার আপডেট করো
+            course.TeacherId = TeacherId;
+
+            _context.Update(course);
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Teacher assigned successfully!";
+            return RedirectToAction(nameof(Index));
+        }
     }
 }

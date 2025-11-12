@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations; // এটা যোগ করো
+using System.ComponentModel.DataAnnotations.Schema; // <--- এটা যোগ করো
 
 namespace EMS.Models
 {
@@ -27,5 +28,10 @@ namespace EMS.Models
         [Required]
         public int SemesterId { get; set; }
         public Semester? Semester { get; set; }
+
+        public string? TeacherId { get; set; }
+
+        [ForeignKey("TeacherId")]
+        public ApplicationUser? Teacher { get; set; }
     }
 }

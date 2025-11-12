@@ -1,0 +1,54 @@
+﻿@model EMS.Models.Course
+
+@{
+    ViewData["Title"] = "Assign Teacher";
+}
+
+<h3>Assign Teacher to Course</h3>
+<div class="card shadow-sm">
+    <div class="card-header bg-light">
+        <h5 class="mb-0">Course: @Model.Title (@Model.CourseCode)</h5>
+    </div>
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-3">Department:</dt>
+            <dd class="col-sm-9">@Model.Department?.Name</dd>
+
+            <dt class="col-sm-3">Semester:</dt>
+            <dd class="col-sm-9">@Model.Semester?.Name</dd>
+
+            <dt class="col-sm-3">Current Teacher:</dt>
+            <dd class="col-sm-9">
+                @if (Model.Teacher != null)
+                {
+                    <span class="badge bg-success">@Model.Teacher.FirstName @Model.Teacher.LastName</span>
+                }
+                else
+                {
+                    <span class="badge bg-warning text-dark">Not Assigned</span>
+                }
+            </dd>
+        </dl>
+
+        <hr />
+
+        <form asp-action="AssignTeacher">
+            <input type="hidden" asp-for="Id" />
+
+            <div class="form-group mb-3">
+                <label class="control-label fw-bold">Select Teacher</label>
+                <select name="TeacherId" class="form-control" asp-items="ViewBag.TeacherId">
+                    <option value="">-- No Teacher (Unassign) --</option>
+                </select>
+                <small class="text-muted">Only teachers from @Model.Department?.Name department are shown.</small>
+            </div>
+
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fa-solid fa-check"></i> Save Assignment
+                </button>
+                <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
