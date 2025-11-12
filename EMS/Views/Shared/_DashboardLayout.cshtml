@@ -156,6 +156,13 @@
                             </li>
 
                             <li class="nav-item">
+                                <a class="nav-link @(currentController == "Teacher" && (currentAction == "ManageExams" || currentAction == "CreateExam") ? "active" : "")"
+                                   asp-controller="Teacher" asp-action="ManageExams">
+                                    <i class="fa-solid fa-file-pen me-2"></i> Exams
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
                                 <a class="nav-link @(currentController == "Teacher" && (currentAction == "Notices" || currentAction == "NoticeDetails") ? "active" : "")"
                                    asp-controller="Teacher" asp-action="Notices">
                                     <i class="fa-solid fa-bullhorn me-2"></i> Notices

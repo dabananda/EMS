@@ -338,5 +338,73 @@ namespace EMS.Controllers
 
             return View(student);
         }
+
+        // GET: Teacher/ManageExams
+        public async Task<IActionResult> ManageExams()
+        {
+            var userId = _userManager.GetUserId(User);
+
+            // ১. এই টিচারের তৈরি করা সব এক্সাম লোড করো
+            var exams = await _context.Exams
+                .Include(e => e.Course)
+                    .ThenInclude(c => c.Semester) // সেমিস্টার নাম দেখানোর জন্য
+                .Where(e => e.Course.TeacherId == userId)
+                .OrderByDescending(e => e.ExamDate)
+                .ToListAsync();
+
+            return View(exams);
+        }
+
+        // Create Exam Section for Teacher 
+        // GET: Teacher/CreateExam
+        public async Task<IActionResult> CreateExam()
+        {
+            var userId = _userManager.GetUserId(User);
+
+            // ১. টিচারের অ্যাসাইন করা কোর্সগুলো লোড করো (ড্রপডাউনের জন্য)
+            var courses = await _context.Courses
+                .Include(c => c.Semester)
+                .Where(c => c.TeacherId == userId)
+                .Select(c => new
+                {
+                    Id = c.Id,
+                    Title = $"{c.CourseCode} : {c.Title} ({c.Semester.Name})"
+                })
+                .ToListAsync();
+
+            ViewBag.CourseId = new SelectList(courses, "Id", "Title");
+            return View();
+        }
+
+        // POST: Teacher/CreateExam
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateExam(Exam exam)
+        {
+            if (ModelState.IsValid)
+            {
+                // সেভ করার আগে লজিক (যেমন: তারিখ ভ্যালিডেশন) চেক করতে পারো
+                _context.Add(exam);
+                await _context.SaveChangesAsync();
+
+                TempData["SuccessMessage"] = "Exam scheduled successfully!";
+                return RedirectToAction(nameof(ManageExams));
+            }
+
+            // Error হলে ড্রপডাউন আবার লোড করো
+            var userId = _userManager.GetUserId(User);
+            var courses = await _context.Courses
+                .Include(c => c.Semester)
+                .Where(c => c.TeacherId == userId)
+                .Select(c => new
+                {
+                    Id = c.Id,
+                    Title = $"{c.CourseCode} : {c.Title} ({c.Semester.Name})"
+                })
+                .ToListAsync();
+
+            ViewBag.CourseId = new SelectList(courses, "Id", "Title", exam.CourseId);
+            return View(exam);
+        }
     }
 }
