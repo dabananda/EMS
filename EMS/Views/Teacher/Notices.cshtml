@@ -1,0 +1,33 @@
+﻿@model IEnumerable<EMS.Models.Notice>
+
+@{
+    ViewData["Title"] = "Notice Board";
+}
+
+<h2 class="mb-4"><i class="fa-solid fa-bullhorn text-warning"></i> Notice Board</h2>
+
+<div class="row">
+    @foreach (var item in Model)
+    {
+        <div class="col-md-12 mb-3">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <h5 class="card-title text-primary">@item.Title</h5>
+                        <small class="text-muted">@item.PostedDate.ToString("dd MMM yyyy")</small>
+                    </div>
+                    <p class="card-text text-muted">
+                        @(item.Description.Length > 100 ? item.Description.Substring(0, 100) + "..." : item.Description)
+                    </p>
+                    <a asp-action="NoticeDetails" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">
+                        Read More <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">No notices available at the moment.</div>
+    }
+</div>

@@ -104,6 +104,14 @@
                                     <i class="fa-solid fa-book-open me-2"></i> My Courses
                                 </a>
                             </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link @(currentController == "Student" && (currentAction == "Notices" || currentAction == "NoticeDetails") ? "active" : "")"
+                                   asp-controller="Student" asp-action="Notices">
+                                    <i class="fa-solid fa-bullhorn me-2"></i> Notice Board
+                                </a>
+                            </li>
+
                             <li class="nav-item">
                                 <a class="nav-link" href="#">
                                     <i class="fa-solid fa-square-poll-vertical me-2"></i> Results (Soon)
@@ -124,6 +132,13 @@
                                 <a class="nav-link @(currentController == "Teacher" && currentAction == "MyCourses" ? "active" : "")"
                                    asp-controller="Teacher" asp-action="MyCourses">
                                     <i class="fa-solid fa-book-open me-2"></i> My Courses
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link @(currentController == "Teacher" && (currentAction == "Notices" || currentAction == "NoticeDetails") ? "active" : "")"
+                                   asp-controller="Teacher" asp-action="Notices">
+                                    <i class="fa-solid fa-bullhorn me-2"></i> Notices
                                 </a>
                             </li>
 

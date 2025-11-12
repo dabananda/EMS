@@ -116,5 +116,28 @@ namespace EMS.Controllers
 
             return View(students);
         }
+
+        //Notice showing in dashboard
+        // GET: Teacher/Notices
+        public async Task<IActionResult> Notices()
+        {
+            var notices = await _context.Notices
+                .Where(n => n.IsForTeachers == true)
+                .OrderByDescending(n => n.PostedDate)
+                .ToListAsync();
+
+            return View(notices);
+        }
+
+        // GET: Teacher/NoticeDetails/5
+        public async Task<IActionResult> NoticeDetails(int? id)
+        {
+            if (id == null) return NotFound();
+
+            var notice = await _context.Notices.FirstOrDefaultAsync(n => n.Id == id);
+            if (notice == null) return NotFound();
+
+            return View(notice);
+        }
     }
 }

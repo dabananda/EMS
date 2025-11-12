@@ -1,0 +1,23 @@
+﻿@model EMS.Models.Notice
+
+@{
+    ViewData["Title"] = "Notice Details";
+}
+
+<div class="card shadow-lg">
+    <div class="card-header bg-primary text-white">
+        <h4 class="mb-0">@Model.Title</h4>
+    </div>
+    <div class="card-body">
+        <p class="text-muted mb-4">
+            <i class="fa-regular fa-calendar"></i> Posted on: @Model.PostedDate.ToString("dd MMMM yyyy")
+        </p>
+
+        <div class="card-text" style="font-size: 1.1rem; line-height: 1.6;">
+            @Html.Raw(Model.Description.Replace("\n", "<br>"))
+        </div>
+    </div>
+    <div class="card-footer">
+        <a asp-action="Notices" class="btn btn-secondary">Back to Notices</a>
+    </div>
+</div>
