@@ -37,12 +37,20 @@
 {
     <div class="card shadow-sm">
         <div class="card-header bg-white py-3">
-            <div class="d-flex justify-content-between">
-                <h5 class="mb-0">
-                    Course: <span class="text-primary">@Model.CourseTitle</span>
-                    <span class="text-muted fs-6">(@Model.CourseCode)</span>
-                </h5>
-                <span class="badge bg-info text-dark">Total Students: @Model.Students.Count</span>
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="mb-0">
+                        Course: <span class="text-primary">@Model.CourseTitle</span>
+                        <span class="text-muted fs-6">(@Model.CourseCode)</span>
+                    </h5>
+                </div>
+
+                <div>
+                    <span class="badge bg-secondary me-2">Total: @Model.Students.Count</span>
+                    <span class="badge bg-success me-2">Present: <span id="lblPresent">0</span></span>
+                    <span class="badge bg-danger me-2">Absent: <span id="lblAbsent">0</span></span>
+                    <span class="badge bg-warning text-dark">Late: <span id="lblLate">0</span></span>
+                </div>
             </div>
         </div>
         <div class="card-body p-0">
@@ -103,4 +111,41 @@ else if (Model.CourseId != 0)
         <i class="fa-solid fa-triangle-exclamation fa-2x mb-2"></i>
         <p>No students found for this course/semester.</p>
     </div>
+}
+
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        $(document).ready(function () {
+
+            // ১. গণনার ফাংশন
+            function updateAttendanceCounts() {
+                // 'Present' ভ্যালু আছে এবং চেক করা আছে এমন ইনপুট গুনো
+                var presentCount = $('input[type="radio"][value="Present"]:checked').length;
+
+                // 'Absent' ভ্যালু আছে এবং চেক করা আছে এমন ইনপুট গুনো
+                var absentCount = $('input[type="radio"][value="Absent"]:checked').length;
+
+                // 'Late' ভ্যালু আছে এবং চেক করা আছে এমন ইনপুট গুনো
+                var lateCount = $('input[type="radio"][value="Late"]:checked').length;
+
+                // ২. টেক্সট আপডেট করো
+                $('#lblPresent').text(presentCount);
+                $('#lblAbsent').text(absentCount);
+                $('#lblLate').text(lateCount);
+            }
+
+            // ৩. পেজ লোড হওয়ার সাথে সাথে একবার রান করো (ডিফল্ট ভ্যালু দেখানোর জন্য)
+            updateAttendanceCounts();
+
+            // ৪. যেকোনো রেডিও বাটনে ক্লিক/চেঞ্জ হলে আবার রান করো (রিয়েল-টাইম আপডেট)
+            $('input[type="radio"]').change(function () {
+                updateAttendanceCounts();
+            });
+        });
+    </script>
 }
