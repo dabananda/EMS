@@ -39,6 +39,13 @@ namespace EMS.Controllers
                 .Where(c => c.TeacherId == userId) // শুধু এই টিচারের কোর্স
                 .ToListAsync();
 
+            // ৩. টিচারদের জন্য নোটিশগুলো লোড করো (নতুন তারিখ আগে)
+            var notices = await _context.Notices
+                .Where(n => n.IsForTeachers == true) // শুধু টিচারদের নোটিশ
+                .OrderByDescending(n => n.PostedDate)
+                .Take(5) // সর্বশেষ ৫টি নোটিশ
+                .ToListAsync();
+
             // ৩. ViewModel-এ ডেটা সেট করো
             var model = new TeacherDashboardViewModel
             {
@@ -50,7 +57,9 @@ namespace EMS.Controllers
 
                 // নতুন ডেটা
                 TotalAssignedCourses = assignedCourses.Count, // কোর্সের সংখ্যা
-                AssignedCourses = assignedCourses             // কোর্সের লিস্ট
+                AssignedCourses = assignedCourses,             // কোর্সের লিস্ট
+
+                Notices = notices               // নোটিশের লিস্ট
             };
 
             return View(model);

@@ -32,6 +32,15 @@ namespace EMS.Controllers
                     .ThenInclude(sp => sp.Semester)
                 .FirstOrDefaultAsync(u => u.Id == userId);
 
+            // স্টুডেন্টদের জন্য নোটিশগুলো লোড করো
+            var notices = await _context.Notices
+                .Where(n => n.IsForStudents == true) // শুধু স্টুডেন্টদের নোটিশ
+                .OrderByDescending(n => n.PostedDate)
+                .Take(5)
+                .ToListAsync();
+
+            ViewBag.Notices = notices;
+
             if (student == null)
             {
                 return NotFound();

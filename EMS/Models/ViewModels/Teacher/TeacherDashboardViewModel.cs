@@ -15,5 +15,6 @@ namespace EMS.Models.ViewModels.Teacher // <--- লক্ষ্য করো: �
         // ভবিষ্যতে আমরা এখানে "Assigned Courses" এর লিস্ট দেখাবো
         public int TotalAssignedCourses { get; set; } = 0;
         public List<Course> AssignedCourses { get; set; } = new List<Course>();
+        public List<Notice> Notices { get; set; } = new List<Notice>();
     }
 }
