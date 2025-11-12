@@ -41,18 +41,20 @@
             <div class="card-body p-0">
                 @if (ViewBag.Notices != null && ((List<EMS.Models.Notice>)ViewBag.Notices).Any())
                 {
-                    <ul class="list-group list-group-flush">
+                    <div class="list-group list-group-flush">
                         @foreach (var notice in (List<EMS.Models.Notice>)ViewBag.Notices)
                         {
-                            <li class="list-group-item">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="fw-bold text-dark">@notice.Title</span>
+                            <a asp-action="NoticeDetails" asp-route-id="@notice.Id" class="list-group-item list-group-item-action flex-column align-items-start">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1 text-dark fw-bold">@notice.Title</h6>
                                     <span class="badge bg-light text-dark border">@notice.PostedDate.ToString("dd MMM")</span>
                                 </div>
-                                <p class="mb-0 mt-1 small text-muted">@notice.Description</p>
-                            </li>
+                                <p class="mb-1 small text-muted">
+                                    @(notice.Description.Length > 80 ? notice.Description.Substring(0, 80) + "..." : notice.Description)
+                                </p>
+                            </a>
                         }
-                    </ul>
+                    </div>
                 }
                 else
                 {
@@ -61,6 +63,9 @@
                         <p>No new notices published yet.</p>
                     </div>
                 }
+            </div>
+            <div class="card-footer text-center bg-white">
+                <a asp-action="Notices" class="btn btn-sm btn-outline-info">View All Notices</a>
             </div>
         </div>
     </div>
