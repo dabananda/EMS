@@ -19,5 +19,6 @@ namespace EMS.Data
         public DbSet<StudentProfile> StudentProfiles { get; set; }
         public DbSet<TeacherProfile> TeacherProfiles { get; set; }
         public DbSet<Notice> Notices { get; set; }
+        public DbSet<StudentAttendance> StudentAttendances { get; set; }
     }
 }

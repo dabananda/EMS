@@ -1,0 +1,68 @@
+﻿@model EMS.Models.ViewModels.Teacher.AttendanceViewModel
+
+@{
+    ViewData["Title"] = "Take Attendance";
+}
+
+<h2 class="mb-3"><i class="fa-solid fa-user-check text-success"></i> Take Attendance</h2>
+
+<div class="card shadow-sm">
+    <div class="card-header bg-light">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h5 class="mb-0">@Model.CourseTitle (@Model.CourseCode)</h5>
+                <small class="text-muted">Date: @Model.Date.ToString("dd MMM yyyy")</small>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <form asp-action="TakeAttendance" method="post">
+            <input type="hidden" asp-for="CourseId" />
+            <input type="hidden" asp-for="Date" />
+
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="bg-white border-bottom">
+                        <tr>
+                            <th>Roll No</th>
+                            <th>Student Name</th>
+                            <th class="text-center">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < Model.Students.Count; i++)
+                        {
+                            <tr>
+                                <input type="hidden" asp-for="Students[i].StudentId" />
+                                <input type="hidden" asp-for="Students[i].StudentName" />
+                                <input type="hidden" asp-for="Students[i].RollNo" />
+
+                                <td class="fw-bold">@Model.Students[i].RollNo</td>
+                                <td>@Model.Students[i].StudentName</td>
+                                <td class="text-center">
+                                    <div class="btn-group" role="group">
+                                        <input type="radio" class="btn-check" asp-for="Students[i].Status" value="Present" id="p_@i" checked>
+                                        <label class="btn btn-outline-success btn-sm" for="p_@i">Present</label>
+
+                                        <input type="radio" class="btn-check" asp-for="Students[i].Status" value="Absent" id="a_@i">
+                                        <label class="btn btn-outline-danger btn-sm" for="a_@i">Absent</label>
+
+                                        <input type="radio" class="btn-check" asp-for="Students[i].Status" value="Late" id="l_@i">
+                                        <label class="btn btn-outline-warning btn-sm" for="l_@i">Late</label>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
+                <a asp-action="MyCourses" class="btn btn-secondary me-md-2">Cancel</a>
+                <button type="submit" class="btn btn-primary px-4">Save Attendance</button>
+            </div>
+        </form>
+    </div>
+</div>

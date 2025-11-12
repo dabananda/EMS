@@ -138,5 +138,81 @@ namespace EMS.Controllers
 
             return View(notice);
         }
+
+        //Take Attendance Section for students
+        // GET: Teacher/TakeAttendance/5
+        public async Task<IActionResult> TakeAttendance(int courseId)
+        {
+            var course = await _context.Courses
+                .Include(c => c.Department)
+                .Include(c => c.Semester)
+                .FirstOrDefaultAsync(c => c.Id == courseId);
+
+            if (course == null) return NotFound();
+
+            // সিকিউরিটি চেক: টিচার কি এই কোর্সের?
+            var userId = _userManager.GetUserId(User);
+            if (course.TeacherId != userId) return RedirectToAction("AccessDenied", "Account");
+
+            // ওই সেমিস্টার ও ডিপার্টমেন্টের স্টুডেন্টদের লোড করো
+            var students = await _context.Users
+                .Include(u => u.StudentProfile)
+                .Where(u => u.StudentProfile != null &&
+                            u.StudentProfile.DepartmentId == course.DepartmentId &&
+                            u.StudentProfile.SemesterId == course.SemesterId)
+                .OrderBy(u => u.StudentProfile.StudentRoll) // রোল অনুযায়ী সাজানো
+                .ToListAsync();
+
+            // ViewModel তৈরি করো
+            var model = new AttendanceViewModel
+            {
+                CourseId = course.Id,
+                CourseTitle = course.Title,
+                CourseCode = course.CourseCode,
+                Date = DateTime.Now,
+                Students = students.Select(s => new StudentAttendanceRow
+                {
+                    StudentId = s.Id,
+                    StudentName = $"{s.FirstName} {s.LastName}",
+                    RollNo = s.StudentProfile.StudentRoll,
+                    Status = AttendanceStatus.Present // ডিফল্ট সবাই উপস্থিত
+                }).ToList()
+            };
+
+            return View(model);
+        }
+
+        // POST: Teacher/TakeAttendance
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> TakeAttendance(AttendanceViewModel model)
+        {
+            // ১. চেক করো আজকের অ্যাটেনডেন্স ইতিমধ্যে নেওয়া হয়েছে কিনা
+            var exists = await _context.StudentAttendances
+                .AnyAsync(a => a.CourseId == model.CourseId && a.Date.Date == model.Date.Date);
+
+            if (exists)
+            {
+                ModelState.AddModelError("", "Attendance for this date already exists!");
+                return View(model);
+            }
+
+            // ২. ডেটাবেসে সেভ করো
+            foreach (var item in model.Students)
+            {
+                var attendance = new StudentAttendance
+                {
+                    CourseId = model.CourseId,
+                    StudentId = item.StudentId,
+                    Date = model.Date,
+                    Status = item.Status
+                };
+                _context.StudentAttendances.Add(attendance);
+            }
+
+            await _context.SaveChangesAsync();
+            TempData["SuccessMessage"] = "Attendance saved successfully!";
+            return RedirectToAction("MyCourses");
+        }
     }
 }
