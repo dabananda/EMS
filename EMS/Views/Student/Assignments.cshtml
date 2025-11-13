@@ -21,28 +21,7 @@
                         <small class="text-muted">Course: <strong>@item.Course.CourseCode</strong></small>
                         @if (submitted != null)
                         {
-                            <div class="alert alert-success py-2 mb-0">
-                                <small><i class="fa-solid fa-check-circle"></i> Submitted on @submitted.SubmissionDate.ToString("dd MMM")</small>
-
-                                @if (submitted.MarksObtained != null)
-                                {
-                                    <div class="mt-2 border-top pt-2">
-                                        <strong>Result:</strong> <span class="badge bg-primary fs-6">@submitted.MarksObtained / @item.TotalMarks</span>
-                                        @if (!string.IsNullOrEmpty(submitted.TeacherFeedback))
-                                        {
-                                            <div class="mt-1 small text-muted fst-italic">
-                                                " @submitted.TeacherFeedback "
-                                            </div>
-                                        }
-                                    </div>
-                                }
-                                else
-                                {
-                                    <div class="mt-1 small text-warning">
-                                        <i class="fa-solid fa-clock"></i> Waiting for grading...
-                                    </div>
-                                }
-                            </div>
+                            <span class="badge bg-success">Submitted</span>
                         }
                         else if (isExpired)
                         {
@@ -69,13 +48,27 @@
                         }
                         else if (submitted != null)
                         {
-                            <div class="alert alert-success py-2 mb-0 text-center">
-                                <small><i class="fa-solid fa-check-circle"></i> Submitted on @submitted.SubmissionDate.ToString("dd MMM")</small>
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-success disabled" style="opacity: 1;">
+                                    <i class="fa-solid fa-check-circle"></i> Submitted on @submitted.SubmissionDate.ToString("dd MMM")
+                                </button>
+
                                 @if (submitted.MarksObtained != null)
                                 {
-                                    <br />
-                    
-                                    <strong>Marks: @submitted.MarksObtained / @item.TotalMarks</strong>
+                                    <button type="button" class="btn btn-outline-primary"
+                                            data-bs-toggle="modal" data-bs-target="#resultModal"
+                                            data-title="@item.Title"
+                                            data-marks="@submitted.MarksObtained"
+                                            data-total="@item.TotalMarks"
+                                            data-feedback="@(string.IsNullOrEmpty(submitted.TeacherFeedback) ? "No feedback provided." : submitted.TeacherFeedback)">
+                                        <i class="fa-solid fa-square-poll-vertical"></i> View Result
+                                    </button>
+                                }
+                                else
+                                {
+                                    <div class="text-center small text-warning mt-2">
+                                        <i class="fa-solid fa-clock"></i> Waiting for grading...
+                                    </div>
                                 }
                             </div>
                         }
@@ -96,3 +89,58 @@
         </div>
     }
 </div>
+
+<div class="modal fade" id="resultModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Assignment Result</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center p-4">
+                <h4 class="mb-3 text-dark" id="modalAssignmentTitle"></h4>
+
+                <div class="d-inline-block border border-4 border-primary rounded-circle p-4 mb-3">
+                    <div class="display-4 fw-bold text-primary">
+                        <span id="modalMarks"></span>
+                    </div>
+                    <div class="small text-muted">out of <span id="modalTotal"></span></div>
+                </div>
+
+                <hr />
+
+                <div class="text-start">
+                    <h6 class="fw-bold text-secondary"><i class="fa-solid fa-comment-dots"></i> Teacher's Feedback:</h6>
+                    <div class="alert alert-light border text-dark fst-italic" id="modalFeedback">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // মোডাল ওপেন হওয়ার সময় ডেটা লোড করার স্ক্রিপ্ট
+        var resultModal = document.getElementById('resultModal');
+        resultModal.addEventListener('show.bs.modal', function (event) {
+            // যে বাটনটিতে ক্লিক করা হয়েছে
+            var button = event.relatedTarget;
+
+            // বাটন থেকে ডেটা বের করা (data-attributes)
+            var title = button.getAttribute('data-title');
+            var marks = button.getAttribute('data-marks');
+            var total = button.getAttribute('data-total');
+            var feedback = button.getAttribute('data-feedback');
+
+            // মোডালের ভেতরে তথ্য বসানো
+            document.getElementById('modalAssignmentTitle').textContent = title;
+            document.getElementById('modalMarks').textContent = marks;
+            document.getElementById('modalTotal').textContent = total;
+            document.getElementById('modalFeedback').textContent = feedback;
+        });
+    </script>
+}
