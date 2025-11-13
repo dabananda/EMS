@@ -1,0 +1,93 @@
+﻿@model IEnumerable<EMS.Models.Assignment>
+
+@{
+    ViewData["Title"] = "Assignment Monitoring";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="text-primary"><i class="fa-solid fa-clipboard-list"></i> Assignment Monitoring</h2>
+</div>
+
+<div class="card shadow-sm mb-4 bg-light">
+    <div class="card-body py-3">
+        <form method="get" asp-action="ManageAssignments" class="row g-3 align-items-end">
+            <div class="col-md-5">
+                <label class="form-label fw-bold small">Search</label>
+                <input type="text" name="searchString" value="@ViewData["CurrentFilter"]" class="form-control" placeholder="Title or Course Code..." />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-bold small">Filter by Course</label>
+                <select name="courseId" class="form-select" asp-items="ViewBag.CourseList">
+                    <option value="">-- All Courses --</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-primary w-100"><i class="fa-solid fa-filter"></i> Filter</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0 align-middle">
+            <thead class="bg-light">
+                <tr>
+                    <th>Title</th>
+                    <th>Course Info</th>
+                    <th>Teacher</th>
+                    <th>Deadline</th>
+                    <th>Marks</th>
+                    <th class="text-end">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Any())
+                {
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="fw-bold text-primary">@item.Title</td>
+                            <td>
+                                <span class="fw-bold">@item.Course.CourseCode</span><br />
+                                <small class="text-muted">@item.Course.Department?.Name</small>
+                            </td>
+                            <td>
+                                @if (item.Teacher != null)
+                                {
+                                    <span>@item.Teacher.FirstName @item.Teacher.LastName</span>
+                                }
+                                else
+                                {
+
+                                    <span class="text-muted">N/A</span>
+                                }
+                            </td>
+                            <td>
+                                @item.Deadline.ToString("dd MMM yyyy") <br />
+                                @if (item.Deadline < DateTime.Now)
+                                {
+                                    <span class="badge bg-danger">Closed</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-success">Active</span>
+                                }
+                            </td>
+                            <td>@item.TotalMarks</td>
+                            <td class="text-end">
+                                <a asp-action="AssignmentSubmissions" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info">
+                                    <i class="fa-solid fa-eye"></i> View Submissions
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr><td colspan="6" class="text-center py-4 text-muted">No assignments found.</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

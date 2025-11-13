@@ -1,0 +1,66 @@
+﻿@model IEnumerable<EMS.Models.AssignmentSubmission>
+
+@{
+    ViewData["Title"] = "Assignment Submissions";
+    var assignment = ViewBag.Assignment as EMS.Models.Assignment;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="text-primary"><i class="fa-solid fa-folder-open"></i> Submissions</h2>
+        <h5 class="text-muted">@assignment.Title - @assignment.Course.CourseCode</h5>
+    </div>
+    <a asp-action="ManageAssignments" class="btn btn-secondary"><i class="fa-solid fa-arrow-left"></i> Back</a>
+</div>
+
+<div class="card shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0 align-middle text-center">
+            <thead class="bg-light">
+                <tr>
+                    <th class="text-start ps-4">Student</th>
+                    <th>Submitted On</th>
+                    <th>File</th>
+                    <th>Marks</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Any())
+                {
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="text-start ps-4">
+                                <div class="fw-bold">@item.Student.FirstName @item.Student.LastName</div>
+                                <small class="text-muted">ID: @item.Student.StudentProfile?.StudentRoll</small>
+                            </td>
+                            <td>@item.SubmissionDate.ToString("dd MMM, h:mm tt")</td>
+                            <td>
+                                <a href="@item.FileUrl" target="_blank" class="btn btn-sm btn-outline-primary">
+                                    <i class="fa-solid fa-download"></i> File
+                                </a>
+                            </td>
+                            <td>
+                                @if(item.MarksObtained != null) {
+                                    <span class="fw-bold">@item.MarksObtained</span> <span class="text-muted">/ @assignment.TotalMarks</span>
+                                } else { <span>-</span> }
+                            </td>
+                            <td>
+                                @if(item.MarksObtained != null) {
+                                    <span class="badge bg-success">Graded</span>
+                                } else {
+                                    <span class="badge bg-warning text-dark">Pending</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr><td colspan="5" class="text-center py-4 text-muted">No submissions found yet.</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

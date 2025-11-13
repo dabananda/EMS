@@ -660,5 +660,65 @@ namespace EMS.Controllers
             return View(results);
         }
 
+        // GET: Admin/ManageAssignments
+        public async Task<IActionResult> ManageAssignments(string searchString, int? courseId)
+        {
+            // ১. সব অ্যাসাইনমেন্ট লোড করো (টিচার, কোর্স, সেমিস্টার সহ)
+            var assignmentsQuery = _context.Assignments
+                .Include(a => a.Course)
+                    .ThenInclude(c => c.Department)
+                .Include(a => a.Course)
+                    .ThenInclude(c => c.Semester)
+                .Include(a => a.Teacher) // কে অ্যাসাইনমেন্ট দিয়েছে
+                .AsQueryable();
+
+            // ২. সার্চ ফিল্টার
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                assignmentsQuery = assignmentsQuery.Where(a => a.Title.Contains(searchString) || a.Course.CourseCode.Contains(searchString));
+            }
+
+            // ৩. কোর্স ফিল্টার
+            if (courseId.HasValue)
+            {
+                assignmentsQuery = assignmentsQuery.Where(a => a.CourseId == courseId);
+            }
+
+            // ড্রপডাউন ডেটা
+            ViewBag.CourseList = new SelectList(_context.Courses, "Id", "CourseCode", courseId);
+            ViewData["CurrentFilter"] = searchString;
+
+            // লেটেস্ট অ্যাসাইনমেন্ট আগে দেখাবে
+            var assignments = await assignmentsQuery.OrderByDescending(a => a.CreatedDate).ToListAsync();
+            return View(assignments);
+        }
+
+        // GET: Admin/AssignmentSubmissions/5
+        public async Task<IActionResult> AssignmentSubmissions(int? id)
+        {
+            if (id == null) return NotFound();
+
+            // ১. অ্যাসাইনমেন্ট ডিটেইলস
+            var assignment = await _context.Assignments
+                .Include(a => a.Course)
+                    .ThenInclude(c => c.Department)
+                .Include(a => a.Course)
+                    .ThenInclude(c => c.Semester)
+                .FirstOrDefaultAsync(a => a.Id == id);
+
+            if (assignment == null) return NotFound();
+
+            // ২. সাবমিশন লিস্ট লোড করো
+            var submissions = await _context.AssignmentSubmissions
+                .Include(s => s.Student)
+                    .ThenInclude(u => u.StudentProfile)
+                .Where(s => s.AssignmentId == id)
+                .OrderBy(s => s.Student.StudentProfile.StudentRoll)
+                .ToListAsync();
+
+            ViewBag.Assignment = assignment;
+            return View(submissions);
+        }
+
     }
 }
