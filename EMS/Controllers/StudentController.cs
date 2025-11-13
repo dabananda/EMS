@@ -314,10 +314,17 @@ namespace EMS.Controllers
 
         private async Task<AIResultDTO> GetGeminiAnalysis(string studentAnswer, string assignmentTitle, double totalMarks)
         {
-            // ১. তোমার API Key
-            string apiKey = "AIzaSyCOqRtW4e5q_c3_L-ZiGB-v3BgmjLh9_Zk";
+            // ১. appsettings.json থেকে Key এবং URL নেওয়া
+            string apiKey = _configuration["Gemini:ApiKey"];
+            string baseUrl = _configuration["Gemini:ModelUrl"]; // যেমন: .../models/gemini-2.0-flash-lite:generateContent
 
-            string apiUrl = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key={apiKey}";
+            if (string.IsNullOrEmpty(apiKey) || string.IsNullOrEmpty(baseUrl))
+            {
+                return new AIResultDTO { marks = 0, feedback = "Configuration Error: API Key or Model URL missing.", ai_probability = 0 };
+            }
+
+            // URL এর সাথে Key যুক্ত করা
+            string apiUrl = $"{baseUrl}?key={apiKey}";
 
             var prompt = $@"
             Act as a strict university professor.
@@ -334,7 +341,7 @@ namespace EMS.Controllers
             2. Provide a short feedback (max 3 sentences).
             3. Analyze the writing style for AI generation probability (0-100).
             
-            Return ONLY a JSON object in this format (no markdown, no ```json):
+            Return ONLY a JSON object in this format (no markdown):
             {{ ""marks"": 0, ""feedback"": ""text"", ""ai_probability"": 0 }}
         ";
 
@@ -352,13 +359,12 @@ namespace EMS.Controllers
 
                     var resultJson = await response.Content.ReadAsStringAsync();
 
-                    // ডিবাগিং: যদি এখনো এরর দেয়, আমরা দেখবো
                     if (!response.IsSuccessStatusCode)
                     {
                         return new AIResultDTO
                         {
                             marks = 0,
-                            feedback = $"API Error: {response.StatusCode} - {resultJson}",
+                            feedback = $"API Error: {response.StatusCode}. Check Key/Model.",
                             ai_probability = 0
                         };
                     }
@@ -371,13 +377,11 @@ namespace EMS.Controllers
                         return new AIResultDTO { marks = 0, feedback = "AI returned empty response.", ai_probability = 0 };
                     }
 
-                    // ক্লিন করা
                     aiText = aiText.Replace("```json", "").Replace("```", "").Trim();
-
                     var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-                    var result = JsonSerializer.Deserialize<AIResultDTO>(aiText, options);
 
-                    return result ?? new AIResultDTO { marks = 0, feedback = "JSON Parsing returned null.", ai_probability = 0 };
+                    return JsonSerializer.Deserialize<AIResultDTO>(aiText, options)
+                           ?? new AIResultDTO { marks = 0, feedback = "JSON Parsing Error.", ai_probability = 0 };
                 }
             }
             catch (Exception ex)
