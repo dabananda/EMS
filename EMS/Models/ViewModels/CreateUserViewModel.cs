@@ -40,19 +40,19 @@ namespace EMS.Models.ViewModels
         public SelectList? DepartmentList { get; set; }
 
 
-        // --- নতুন এই প্রপার্টিটি যোগ করো ---
+        // --- নতুন এই প্রপার্টিটি যোগ ---
         [Required]
         [Phone]
         [Display(Name = "Phone Number")]
         public string PhoneNumber { get; set; }
 
 
-        // --- ধাপ ৩: শুধুমাত্র টিচারের জন্য ---
+        // শুধুমাত্র টিচারের জন্য ---
         [Display(Name = "Designation (If Teacher)")]
-        public string? Designation { get; set; } // যেমন: "Lecturer"
+        public string? Designation { get; set; }
 
 
-        // --- ধাপ ৪: শুধুমাত্র স্টুডেন্টের জন্য ---
+        // শুধুমাত্র স্টুডেন্টের জন্য ---
         [Display(Name = "Student Roll (If Student)")]
         public string? StudentRoll { get; set; }
 
@@ -60,10 +60,10 @@ namespace EMS.Models.ViewModels
         public string? RegistrationNo { get; set; }
 
         [Display(Name = "Session (If Student)")]
-        public string? Session { get; set; } // যেমন: "2020-21"
+        public string? Session { get; set; }
 
         [Display(Name = "Date of Birth (If Student)")]
-        [DataType(DataType.Date)] // Date picker দেখানোর জন্য
+        [DataType(DataType.Date)]
         public DateTime? DateOfBirth { get; set; }
 
         [Display(Name = "Blood Group (If Student)")]

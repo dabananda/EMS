@@ -3,75 +3,154 @@
 
 @{
     ViewData["Title"] = "Log in";
+    Layout = null;
 }
 
-<h1>@ViewData["Title"]</h1>
-<div class="row">
-    <div class="col-md-4">
-        <section>
-            <form id="account" method="post">
-                <h2>Use a local account to log in.</h2>
-                <hr />
-                <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
-                <div class="form-floating mb-3">
-                    <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
-                    <label asp-for="Input.Email" class="form-label">Email</label>
-                    <span asp-validation-for="Input.Email" class="text-danger"></span>
-                </div>
-                <div class="form-floating mb-3">
-                    <input asp-for="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="password" />
-                    <label asp-for="Input.Password" class="form-label">Password</label>
-                    <span asp-validation-for="Input.Password" class="text-danger"></span>
-                </div>
-                <div class="checkbox mb-3">
-                    <label asp-for="Input.RememberMe" class="form-label">
-                        <input class="form-check-input" asp-for="Input.RememberMe" />
-                        @Html.DisplayNameFor(m => m.Input.RememberMe)
-                    </label>
-                </div>
-                <div>
-                    <button id="login-submit" type="submit" class="w-100 btn btn-lg btn-primary">Log in</button>
-                </div>
-                <div>
-                    <p>
-                        <a id="forgot-password" asp-page="./ForgotPassword">Forgot your password?</a>
-                    </p>
-                </div>
-            </form>
-        </section>
-    </div>
-    <div class="col-md-6 col-md-offset-2">
-        <section>
-            <h3>Use another service to log in.</h3>
-            <hr />
-            @{
-                if ((Model.ExternalLogins?.Count ?? 0) == 0)
-                {
-                    <div>
-                        <p>
-                            There are no external authentication services configured. See this <a href="https://go.microsoft.com/fwlink/?LinkID=532715">article
-                            about setting up this ASP.NET application to support logging in via external services</a>.
-                        </p>
-                    </div>
-                }
-                else
-                {
-                    <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
-                        <div>
-                            <p>
-                                @foreach (var provider in Model.ExternalLogins!)
-                                {
-                                    <button type="submit" class="btn btn-primary" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">@provider.DisplayName</button>
-                                }
-                            </p>
-                        </div>
-                    </form>
-                }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - EMS</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+            width: 100%;
+            max-width: 450px;
+            background: white;
+        }
+
+        .login-header {
+            background: #0d6efd;
+            padding: 30px;
+            text-align: center;
+            color: white;
+        }
+
+        .login-body {
+            padding: 40px 30px;
+        }
+
+        /* ইনপুট ফিল্ড ডিজাইন আপডেট */
+        .input-group-text {
+            background: #fff;
+            border-right: none;
+            color: #6c757d;
+        }
+
+        .form-control {
+            border-left: none;
+            height: 50px; /* হাইট ফিক্সড করা হলো */
+            border-radius: 0 8px 8px 0;
+        }
+
+            .form-control:focus {
+                box-shadow: none;
+                border-color: #ced4da;
             }
-        </section>
-    </div>
-</div>
+        /* ইনপুট গ্রুপের বাম পাশের বর্ডার রাউন্ড করা */
+        .input-group .input-group-text {
+            border-radius: 8px 0 0 8px;
+        }
 
-@section Scripts {
+        .btn-login {
+            border-radius: 8px;
+            padding: 12px;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .home-link {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            text-decoration: none;
+            color: #495057;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 5px 15px;
+            border-radius: 30px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+        }
+
+            .home-link:hover {
+                color: #0d6efd;
+                background: white;
+                transform: translateY(-2px);
+            }
+    </style>
+</head>
+<body>
+
+    <a href="/" class="home-link"><i class="fa-solid fa-arrow-left me-2"></i> Back to Home</a>
+
+    <div class="login-card">
+        <div class="login-header">
+            <i class="fa-solid fa-user-graduate fa-3x mb-3"></i>
+            <h3 class="fw-bold">Welcome Back!</h3>
+            <p class="mb-0 opacity-75">Sign in to your EMS account</p>
+        </div>
+        <div class="login-body">
+            <form id="account" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3 text-center small" role="alert"></div>
+
+                <div class="mb-3">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fa-solid fa-envelope"></i></span>
+                        <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="Email Address" />
+                    </div>
+                    <span asp-validation-for="Input.Email" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-4">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
+                        <input asp-for="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="Password" />
+                    </div>
+                    <span asp-validation-for="Input.Password" class="text-danger small"></span>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div class="form-check">
+                        <input class="form-check-input" asp-for="Input.RememberMe" />
+                        <label class="form-check-label text-muted small" asp-for="Input.RememberMe">
+                            Remember me
+                        </label>
+                    </div>
+                    <a id="forgot-password" asp-page="./ForgotPassword" class="text-decoration-none small">Forgot password?</a>
+                </div>
+
+                <button id="login-submit" type="submit" class="w-100 btn btn-primary btn-login mb-3">Log In</button>
+
+                @*
+                <div class="text-center">
+                    <span class="text-muted small">Don't have an account?</span>
+                    <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl" class="text-decoration-none fw-bold ms-1">Register</a>
+                </div>
+                *@
+
+            </form>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <partial name="_ValidationScriptsPartial" />
-}
+</body>
+</html>

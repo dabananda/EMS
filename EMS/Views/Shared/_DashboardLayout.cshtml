@@ -51,26 +51,17 @@
                 {
                     var user = await UserManager.GetUserAsync(User);
                     string displayName = "User";
-                    string profileUrl = "#";
 
-                    // নাম এবং লিংক লজিক
+                    // 👇 প্রোফাইল লিংক ফিক্স করা হয়েছে (সবার জন্য একই) 👇
+                    string profileUrl = "/Identity/Account/Manage";
+
                     if (User.IsInRole("Admin"))
                     {
                         displayName = "Admin";
-                        profileUrl = Url.Action("Index", "Admin");
                     }
                     else if (user != null)
                     {
                         displayName = $"{user.FirstName} {user.LastName}";
-
-                        if (User.IsInRole("Student"))
-                        {
-                            profileUrl = Url.Action("Index", "Student");
-                        }
-                        else if (User.IsInRole("Teacher"))
-                        {
-                            profileUrl = Url.Action("Index", "Teacher");
-                        }
                     }
 
                     <form class="d-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post">
@@ -79,7 +70,7 @@
                         </button>
                     </form>
 
-                    <a href="@profileUrl" class="d-flex align-items-center text-decoration-none text-dark profile-link p-1" title="Go to My Dashboard">
+                    <a href="@profileUrl" class="d-flex align-items-center text-decoration-none text-dark profile-link p-1" title="Manage Account">
                         <div class="rounded-circle bg-light border d-flex justify-content-center align-items-center me-2 text-secondary"
                              style="width: 38px; height: 38px;">
                             <i class="fa-solid fa-user"></i>
