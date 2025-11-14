@@ -569,17 +569,37 @@ namespace EMS.Controllers
             return View(students);
         }
 
+        // Teachers Index page information pass & filtering logic
         // GET: Admin/Teachers
-        public async Task<IActionResult> Teachers()
+        public async Task<IActionResult> Teachers(string searchString, int? departmentId)
         {
-            // শুধুমাত্র যাদের TeacherProfile আছে (মানে টিচার) তাদের খুঁজে বের করো
-            var teachers = await _context.Users
+            // ১. বেসিক কুয়েরি
+            var teachersQuery = _context.Users
                 .Include(u => u.TeacherProfile)
                     .ThenInclude(tp => tp.Department) // ডিপার্টমেন্ট নাম দেখানোর জন্য
-                .Where(u => u.TeacherProfile != null) // ফিল্টার
-                .ToListAsync();
+                .Where(u => u.TeacherProfile != null) // শুধু টিচারদের নাও
+                .AsQueryable();
 
-            return View(teachers);
+            // ২. সার্চ লজিক (নাম অথবা ইমেইল)
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                teachersQuery = teachersQuery.Where(t =>
+                    t.FirstName.Contains(searchString) ||
+                    t.LastName.Contains(searchString) ||
+                    t.Email.Contains(searchString));
+            }
+
+            // ৩. ডিপার্টমেন্ট ফিল্টার
+            if (departmentId.HasValue)
+            {
+                teachersQuery = teachersQuery.Where(t => t.TeacherProfile.DepartmentId == departmentId);
+            }
+
+            // ৪. ড্রপডাউন এবং ভিউ ডেটা সেট করা
+            ViewBag.DepartmentId = new SelectList(_context.Departments, "Id", "Name", departmentId);
+            ViewData["CurrentFilter"] = searchString;
+
+            return View(await teachersQuery.ToListAsync());
         }
 
 
