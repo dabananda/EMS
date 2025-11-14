@@ -1,36 +1,162 @@
 ﻿@{
-    ViewData["Title"] = "Admin Panel";
+    ViewData["Title"] = "Admin Dashboard";
 }
 
-<h1>@ViewData["Title"]</h1>
-<p>Welcome to the Admin control panel.</p>
-
-@if (TempData["SuccessMessage"] != null)
-{
-    <div class="alert alert-success" role="alert">
-        @TempData["SuccessMessage"]
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="text-primary fw-bold"><i class="fa-solid fa-gauge-high"></i> Dashboard Overview</h2>
+        <p class="text-muted">Welcome back, Admin! Here's what's happening today.</p>
     </div>
-}
-@if (ViewBag.StatusMessage != null)
-{
-    <div class="alert alert-success" role="alert">
-        @ViewBag.StatusMessage
+    <div>
+        <span class="badge bg-light text-dark border p-2">
+            <i class="fa-regular fa-calendar"></i> @DateTime.Now.ToString("dd MMMM yyyy")
+        </span>
     </div>
-}
-
-<hr />
-
-<h3>User Management</h3>
-<div>
-    <a class="btn btn-primary"
-       asp-controller="Admin"
-       asp-action="CreateUser">
-        Create New User
-    </a>
-
-    <a class="btn btn-primary"
-       asp-controller="Admin"
-       asp-action="ListUsers">
-        View Users
-    </a>
 </div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card shadow-sm border-primary h-100">
+            <div class="card-body d-flex align-items-center justify-content-between">
+                <div>
+                    <h6 class="text-muted fw-bold">Total Students</h6>
+                    <h2 class="mb-0 fw-bold text-primary" id="countStudent">...</h2>
+                </div>
+                <div class="bg-primary text-white rounded-circle p-3">
+                    <i class="fa-solid fa-user-graduate fa-2x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-sm border-success h-100">
+            <div class="card-body d-flex align-items-center justify-content-between">
+                <div>
+                    <h6 class="text-muted fw-bold">Total Teachers</h6>
+                    <h2 class="mb-0 fw-bold text-success" id="countTeacher">...</h2>
+                </div>
+                <div class="bg-success text-white rounded-circle p-3">
+                    <i class="fa-solid fa-chalkboard-user fa-2x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-sm border-warning h-100">
+            <div class="card-body d-flex align-items-center justify-content-between">
+                <div>
+                    <h6 class="text-muted fw-bold">Active Courses</h6>
+                    <h2 class="mb-0 fw-bold text-warning" id="countCourse">...</h2>
+                </div>
+                <div class="bg-warning text-white rounded-circle p-3">
+                    <i class="fa-solid fa-book-open fa-2x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-sm border-info h-100">
+            <div class="card-body d-flex align-items-center justify-content-between">
+                <div>
+                    <h6 class="text-muted fw-bold">Total Notices</h6>
+                    <h2 class="mb-0 fw-bold text-info" id="countNotice">...</h2>
+                </div>
+                <div class="bg-info text-white rounded-circle p-3">
+                    <i class="fa-solid fa-bullhorn fa-2x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-8">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-white fw-bold">
+                <i class="fa-solid fa-chart-column text-primary"></i> Students per Department
+            </div>
+            <div class="card-body">
+                <canvas id="deptChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-white fw-bold">
+                <i class="fa-solid fa-chart-pie text-success"></i> User Ratio
+            </div>
+            <div class="card-body d-flex justify-content-center align-items-center">
+                <div style="width: 100%; max-width: 300px;">
+                    <canvas id="userChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            // ডেটা লোড করা
+            $.ajax({
+                url: '/Admin/GetDashboardStats',
+                type: 'GET',
+                success: function (data) {
+                    // ক. কার্ড আপডেট
+                    $('#countStudent').text(data.totalStudents);
+                    $('#countTeacher').text(data.totalTeachers);
+                    $('#countCourse').text(data.totalCourses);
+                    $('#countNotice').text(data.totalNotices);
+
+                    // খ. Bar Chart (Students per Dept)
+                    var deptLabels = data.studentsByDept.map(x => x.label);
+                    var deptValues = data.studentsByDept.map(x => x.value);
+
+                    new Chart(document.getElementById('deptChart'), {
+                        type: 'bar',
+                        data: {
+                            labels: deptLabels,
+                            datasets: [{
+                                label: 'Number of Students',
+                                data: deptValues,
+                                backgroundColor: '#0d6efd',
+                                borderRadius: 5
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            scales: {
+                                y: { beginAtZero: true, ticks: { stepSize: 1 } }
+                            }
+                        }
+                    });
+
+                    // গ. Pie Chart (Student vs Teacher)
+                    new Chart(document.getElementById('userChart'), {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Students', 'Teachers'],
+                            datasets: [{
+                                data: [data.totalStudents, data.totalTeachers],
+                                backgroundColor: ['#0d6efd', '#198754'],
+                                hoverOffset: 4
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: { position: 'bottom' }
+                            }
+                        }
+                    });
+                },
+                error: function (err) {
+                    console.error("Error loading stats", err);
+                }
+            });
+        });
+    </script>
+}

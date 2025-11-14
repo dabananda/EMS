@@ -720,5 +720,34 @@ namespace EMS.Controllers
             return View(submissions);
         }
 
+        //Admin Dashboard Data passing for chart and information
+        // GET: Admin/GetDashboardStats (AJAX Call এর জন্য)
+        [HttpGet]
+        public async Task<JsonResult> GetDashboardStats()
+        {
+            // ১. মোট সংখ্যা বের করা
+            var totalStudents = await _context.StudentProfiles.CountAsync();
+            var totalTeachers = await _context.TeacherProfiles.CountAsync();
+            var totalCourses = await _context.Courses.CountAsync();
+            var totalNotices = await _context.Notices.CountAsync();
+
+            // ২. ডিপার্টমেন্ট অনুযায়ী স্টুডেন্ট সংখ্যা (Bar Chart এর জন্য)
+            var studentsByDept = await _context.StudentProfiles
+                .Include(s => s.Department)
+                .GroupBy(s => s.Department.Name)
+                .Select(g => new { label = g.Key, value = g.Count() })
+                .ToListAsync();
+
+            // ৩. ডেটা রিটার্ন করো
+            return Json(new
+            {
+                totalStudents,
+                totalTeachers,
+                totalCourses,
+                totalNotices,
+                studentsByDept
+            });
+        }
+
     }
 }
