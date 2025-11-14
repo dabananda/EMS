@@ -727,7 +727,7 @@ namespace EMS.Controllers
         {
             var today = DateTime.Now.Date;
 
-            // কাউন্ট
+            // Basic data count
             var totalStudents = await _context.StudentProfiles.CountAsync();
             var totalTeachers = await _context.TeacherProfiles.CountAsync();
             var totalCourses = await _context.Courses.CountAsync();
@@ -735,19 +735,44 @@ namespace EMS.Controllers
             var totalDepartments = await _context.Departments.CountAsync();
             var totalExams = await _context.Exams.CountAsync();
 
-            // আজকের উপস্থিতি (Students Present Today)
-            // আজকের তারিখে কতজন স্টুডেন্ট 'Present' বা 'Late' স্ট্যাটাসে আছে
             var presentToday = await _context.StudentAttendances
                 .Where(a => a.Date.Date == today && (a.Status == AttendanceStatus.Present || a.Status == AttendanceStatus.Late))
                 .Select(a => a.StudentId)
-                .Distinct() // একজন স্টুডেন্ট একাধিক ক্লাসে প্রেজেন্ট থাকতে পারে
+                .Distinct()
                 .CountAsync();
 
-            // ৪. ডিপার্টমেন্ট চার্ট ডেটা
+            //  Department wise Students
             var studentsByDept = await _context.StudentProfiles
                 .Include(s => s.Department)
                 .GroupBy(s => s.Department.Name)
                 .Select(g => new { label = g.Key, value = g.Count() })
+                .ToListAsync();
+
+            //  Session wise Students
+            var studentsBySession = await _context.StudentProfiles
+                .GroupBy(s => s.Session)
+                .Select(g => new { label = g.Key, value = g.Count() })
+                .OrderBy(x => x.label)
+                .ToListAsync();
+
+            //Today's Attendance Summary
+            // আজকের মোট Present, Absent, Late সংখ্যা
+            var attendanceStats = await _context.StudentAttendances
+                .Where(a => a.Date.Date == today)
+                .GroupBy(a => a.Status)
+                .Select(g => new { status = g.Key.ToString(), count = g.Count() })
+                .ToListAsync();
+
+            // নোটিশ লিস্ট
+            var recentNotices = await _context.Notices
+                .OrderByDescending(n => n.PostedDate)
+                .Take(5)
+                .Select(n => new {
+                    title = n.Title,
+                    date = n.PostedDate.ToString("dd MMM"),
+                    isForStudent = n.IsForStudents,
+                    isForTeacher = n.IsForTeachers
+                })
                 .ToListAsync();
 
             return Json(new
@@ -757,9 +782,12 @@ namespace EMS.Controllers
                 totalCourses,
                 totalNotices,
                 totalDepartments,
-                totalExams,     
-                presentToday,  
-                studentsByDept
+                totalExams,
+                presentToday,
+                studentsByDept,
+                studentsBySession, 
+                attendanceStats,   
+                recentNotices      
             });
         }
 
