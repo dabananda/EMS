@@ -24,7 +24,12 @@ namespace EMS.Controllers
         // GET: Departments
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Departments.ToListAsync());
+            // load course for count
+            var departments = await _context.Departments
+                .Include(d => d.Courses)
+                .ToListAsync();
+
+            return View(departments);
         }
 
         // GET: Departments/Details/5
