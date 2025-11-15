@@ -1,48 +1,37 @@
 ﻿@model EMS.Models.Notice
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Notice Details";
 }
 
-<h1>Details</h1>
-
-<div>
-    <h4>Notice</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Title)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Title)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Description)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Description)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.PostedDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.PostedDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.IsForStudents)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.IsForStudents)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.IsForTeachers)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.IsForTeachers)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow border-0 mt-4">
+            <div class="card-header bg-white py-4 border-bottom">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h3 class="text-primary fw-bold mb-2">@Model.Title</h3>
+                        <span class="text-muted small"><i class="fa-regular fa-clock me-1"></i> Posted on @Model.PostedDate.ToString("dd MMMM yyyy")</span>
+                    </div>
+                    <div class="text-end">
+                        @if (Model.IsForStudents)
+                        {
+                            <span class="badge bg-success mb-1">Student</span>
+                        }
+                        @if (Model.IsForTeachers)
+                        {
+                            <span class="badge bg-info text-dark">Teacher</span>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="card-body p-4">
+                <div class="card-text text-dark" style="white-space: pre-wrap; line-height: 1.7;">@Model.Description</div>
+            </div>
+            <div class="card-footer bg-light py-3 text-end">
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning px-4 fw-bold me-2">Edit</a>
+                <a asp-action="Index" class="btn btn-outline-secondary px-4">Back to Board</a>
+            </div>
+        </div>
+    </div>
 </div>

@@ -22,7 +22,12 @@ namespace EMS.Controllers
         // GET: Notices
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Notices.ToListAsync());
+            // PostedDate Descending
+            var notices = await _context.Notices
+                .OrderByDescending(n => n.PostedDate)
+                .ToListAsync();
+
+            return View(notices);
         }
 
         // GET: Notices/Details/5

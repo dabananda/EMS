@@ -4,47 +4,75 @@
     ViewData["Title"] = "Notice Board";
 }
 
-<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-    <h1 class="h2">Notice Board</h1>
-    <div class="btn-toolbar mb-2 mb-md-0">
-        <a asp-action="Create" class="btn btn-sm btn-primary">
-            <i class="fa-solid fa-plus"></i> Publish New Notice
-        </a>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="text-primary fw-bold"><i class="fa-solid fa-bullhorn me-2"></i> Notice Board</h2>
+        <p class="text-muted mb-0">Publish and manage important announcements.</p>
     </div>
+    <a asp-action="Create" class="btn btn-primary fw-bold px-4 shadow-sm">
+        <i class="fa-solid fa-plus me-2"></i> Publish Notice
+    </a>
 </div>
 
-<div class="row">
-    @foreach (var item in Model.OrderByDescending(n => n.PostedDate))
-    {
-        <div class="col-md-6 mb-4">
-            <div class="card h-100 shadow-sm">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <small class="text-muted">
-                        <i class="fa-regular fa-calendar"></i> @item.PostedDate.ToString("dd MMM yyyy")
-                    </small>
-                    <div>
-                        @if (item.IsForStudents)
-                        {
-                            <span class="badge bg-success" title="For Students"><i class="fa-solid fa-user-graduate"></i> Student</span>
-                        }
-                        @if (item.IsForTeachers)
-                        {
-                            <span class="badge bg-info text-dark" title="For Teachers"><i class="fa-solid fa-chalkboard-user"></i> Teacher</span>
-                        }
+@if (!Model.Any())
+{
+    <div class="text-center py-5 text-muted bg-light rounded border border-dashed">
+        <i class="fa-regular fa-clipboard fa-3x mb-3 opacity-25"></i>
+        <h5>No notices published yet.</h5>
+        <p>Click "Publish Notice" to create one.</p>
+    </div>
+}
+else
+{
+    <div class="row g-4">
+        @foreach (var item in Model.OrderByDescending(n => n.PostedDate))
+        {
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm border-0 notice-card">
+                    <div class="card-header bg-white border-0 pt-3 d-flex justify-content-between align-items-start">
+                        <span class="badge bg-light text-dark border">
+                            <i class="fa-regular fa-calendar me-1"></i> @item.PostedDate.ToString("dd MMM yyyy")
+                        </span>
+
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-light rounded-circle" type="button" data-bs-toggle="dropdown">
+                                <i class="fa-solid fa-ellipsis-vertical"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+                                <li><a class="dropdown-item" asp-action="Edit" asp-route-id="@item.Id"><i class="fa-solid fa-pen text-warning me-2"></i> Edit</a></li>
+                                <li><a class="dropdown-item" asp-action="Details" asp-route-id="@item.Id"><i class="fa-solid fa-eye text-info me-2"></i> View</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" asp-action="Delete" asp-route-id="@item.Id"><i class="fa-solid fa-trash me-2"></i> Delete</a></li>
+                            </ul>
+                        </div>
                     </div>
-                </div>
-                <div class="card-body">
-                    <h5 class="card-title text-primary">@item.Title</h5>
-                    <p class="card-text text-truncate">@item.Description</p>
-                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary stretched-link">Read More</a>
-                </div>
-                <div class="card-footer bg-white border-top-0 text-end">
-                    <div class="btn-group btn-group-sm" style="position: relative; z-index: 2;">
-                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-warning"><i class="fa-solid fa-pen"></i></a>
-                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-outline-danger"><i class="fa-solid fa-trash"></i></a>
+
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold text-dark mb-2">
+                            <a asp-action="Details" asp-route-id="@item.Id" class="text-decoration-none text-dark">@item.Title</a>
+                        </h5>
+
+                        <div class="mb-3">
+                            @if (item.IsForStudents)
+                            {
+                                <span class="badge bg-success bg-opacity-10 text-success border border-success me-1">Student</span>
+                            }
+                            @if (item.IsForTeachers)
+                            {
+                                <span class="badge bg-info bg-opacity-10 text-info border border-info">Teacher</span>
+                            }
+                        </div>
+
+                        <p class="card-text text-muted small text-truncate-3">
+                            @(item.Description.Length > 100 ? item.Description.Substring(0, 100) + "..." : item.Description)
+                        </p>
+                    </div>
+
+                    <div class="card-footer bg-white border-0 pb-3">
+                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-primary btn-sm w-100">Read More</a>
                     </div>
                 </div>
             </div>
-        </div>
-    }
-</div>
+        }
+    </div>
+}

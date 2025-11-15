@@ -1,53 +1,65 @@
 ﻿@model EMS.Models.Notice
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Publish Notice";
 }
 
-<h1>Create</h1>
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-sm border-0 mt-4">
+            <div class="card-header bg-primary text-white py-3">
+                <h5 class="mb-0 fw-bold"><i class="fa-solid fa-pen-nib me-2"></i> Publish New Notice</h5>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="Create">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger small py-2"></div>
 
-<h4>Notice</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Title" class="control-label"></label>
-                <input asp-for="Title" class="form-control" />
-                <span asp-validation-for="Title" class="text-danger"></span>
+                    <div class="mb-3">
+                        <label asp-for="Title" class="form-label fw-bold text-muted">Notice Title</label>
+                        <input asp-for="Title" class="form-control" placeholder="e.g., Exam Schedule Released" />
+                        <span asp-validation-for="Title" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Description" class="form-label fw-bold text-muted">Details</label>
+                        <textarea asp-for="Description" class="form-control" rows="6" placeholder="Write the full notice content here..."></textarea>
+                        <span asp-validation-for="Description" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="PostedDate" class="form-label fw-bold text-muted">Publish Date</label>
+                        <input asp-for="PostedDate" class="form-control" type="date" />
+                        <span asp-validation-for="PostedDate" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold text-muted d-block">Target Audience</label>
+                        <div class="d-flex gap-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" asp-for="IsForStudents" />
+                                <label class="form-check-label" asp-for="IsForStudents">For Students</label>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" asp-for="IsForTeachers" />
+                                <label class="form-check-label" asp-for="IsForTeachers">For Teachers</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a asp-action="Index" class="btn btn-light border px-4 me-md-2">Cancel</a>
+                        <button type="submit" class="btn btn-primary fw-bold px-4">
+                            <i class="fa-solid fa-paper-plane me-2"></i> Publish
+                        </button>
+                    </div>
+                </form>
             </div>
-            <div class="form-group">
-                <label asp-for="Description" class="control-label"></label>
-                <textarea asp-for="Description" class="form-control"></textarea>
-                <span asp-validation-for="Description" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="PostedDate" class="control-label"></label>
-                <input asp-for="PostedDate" class="form-control" />
-                <span asp-validation-for="PostedDate" class="text-danger"></span>
-            </div>
-            <div class="form-group form-check">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="IsForStudents" /> @Html.DisplayNameFor(model => model.IsForStudents)
-                </label>
-            </div>
-            <div class="form-group form-check">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="IsForTeachers" /> @Html.DisplayNameFor(model => model.IsForTeachers)
-                </label>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
+        </div>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }
