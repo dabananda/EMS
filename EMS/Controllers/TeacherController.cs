@@ -499,19 +499,43 @@ namespace EMS.Controllers
         }
 
         // GET: Teacher/MyClassSchedule
-        public async Task<IActionResult> MyClassSchedule()
+        public async Task<IActionResult> MyClassSchedule(int? semesterId, DayOfWeekEnum? day)
         {
             var userId = _userManager.GetUserId(User);
 
-            // টিচারের নিজস্ব ক্লাস রুটিন খুঁজে বের করা
-            var routines = await _context.ClassRoutines
+            // ১. টিচারের রুটিন কুয়েরি তৈরি
+            var routinesQuery = _context.ClassRoutines
                 .Include(r => r.Course)
                     .ThenInclude(c => c.Department)
                 .Include(r => r.Course)
                     .ThenInclude(c => c.Semester)
-                .Where(r => r.Course.TeacherId == userId) // লজিক: শুধু এই টিচারের ক্লাস
-                .OrderBy(r => r.Day)        // বার অনুযায়ী
-                .ThenBy(r => r.StartTime)   // সময় অনুযায়ী
+                .Where(r => r.Course.TeacherId == userId) // শুধু এই টিচারের ক্লাস
+                .AsQueryable();
+
+            // ২. ফিল্টার লজিক
+            if (semesterId.HasValue)
+            {
+                routinesQuery = routinesQuery.Where(r => r.Course.SemesterId == semesterId);
+            }
+
+            if (day.HasValue)
+            {
+                routinesQuery = routinesQuery.Where(r => r.Day == day);
+            }
+
+            // ৩. ফিল্টার ড্রপডাউনের জন্য ডেটা (শুধু টিচারের কোর্সের সেমিস্টারগুলো)
+            var teacherSemesters = await _context.Courses
+                .Where(c => c.TeacherId == userId)
+                .Select(c => c.Semester)
+                .Distinct()
+                .ToListAsync();
+
+            ViewBag.SemesterId = new SelectList(teacherSemesters, "Id", "Name", semesterId);
+
+            // ৪. সাজানো এবং রিটার্ন
+            var routines = await routinesQuery
+                .OrderBy(r => r.Day)
+                .ThenBy(r => r.StartTime)
                 .ToListAsync();
 
             return View(routines);

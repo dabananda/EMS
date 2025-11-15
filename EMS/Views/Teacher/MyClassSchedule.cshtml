@@ -2,7 +2,6 @@
 
 @{
     ViewData["Title"] = "My Class Schedule";
-    // দিন অনুযায়ী রুটিন গ্রুপিং করা
     var groupedRoutine = Model.GroupBy(r => r.Day).OrderBy(g => g.Key);
 }
 
@@ -13,17 +12,52 @@
     </div>
 </div>
 
+<div class="card shadow-sm border-0 mb-4 bg-light">
+    <div class="card-body py-3">
+        <form method="get" asp-action="MyClassSchedule">
+            <div class="row g-3 align-items-end">
+
+                <div class="col-md-4">
+                    <label class="form-label fw-bold text-muted small text-uppercase">Filter by Semester</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0"><i class="fa-solid fa-layer-group text-muted"></i></span>
+                        <select name="semesterId" class="form-select border-start-0" asp-items="ViewBag.SemesterId" onchange="this.form.submit()">
+                            <option value="">-- All Semesters --</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label fw-bold text-muted small text-uppercase">Filter by Day</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0"><i class="fa-solid fa-calendar-day text-muted"></i></span>
+                        <select name="day" class="form-select border-start-0" asp-items="Html.GetEnumSelectList<EMS.Models.DayOfWeekEnum>()" onchange="this.form.submit()">
+                            <option value="">-- All Days --</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <a asp-action="MyClassSchedule" class="btn btn-outline-secondary fw-bold w-100">
+                        <i class="fa-solid fa-rotate-right me-2"></i> Reset Filter
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
 @if (!Model.Any())
 {
-    <div class="text-center py-5 text-muted bg-light rounded border border-dashed">
+    <div class="text-center py-5 text-muted bg-light rounded border border-dashed mb-5">
         <i class="fa-regular fa-calendar-xmark fa-3x mb-3 opacity-25"></i>
         <h5>No class schedule found.</h5>
-        <p class="mb-0">You haven't been assigned any class routines yet.</p>
+        <p class="mb-0">Try changing the filters to see results.</p>
     </div>
 }
 else
 {
-    <div class="row g-4">
+    <div class="row g-4 mb-5">
         @foreach (var dayGroup in groupedRoutine)
         {
             <div class="col-md-6 col-lg-4">
