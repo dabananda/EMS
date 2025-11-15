@@ -4,22 +4,26 @@
     ViewData["Title"] = "My Assigned Courses";
 }
 
-<h2 class="mb-4"><i class="fa-solid fa-book-open text-primary"></i> My Courses</h2>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="text-primary fw-bold"><i class="fa-solid fa-chalkboard-user me-2"></i> My Courses</h2>
+        <p class="text-muted mb-0">Overview of all courses assigned to you.</p>
+    </div>
+</div>
 
-<div class="card shadow-sm">
-    <div class="card-header bg-white py-3">
-        <h5 class="mb-0 text-muted">Total Assigned: <span class="badge bg-primary">@Model.Count()</span></h5>
+<div class="card shadow-sm border-0 mb-5">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+        <h6 class="mb-0 fw-bold text-primary"><i class="fa-solid fa-list me-2"></i> Course List</h6>
+        <span class="badge bg-light text-dark border">Total: @Model.Count()</span>
     </div>
     <div class="table-responsive">
         <table class="table table-hover mb-0 align-middle">
             <thead class="bg-light">
                 <tr>
-                    <th>Course Code</th>
-                    <th>Title</th>
-                    <th>Department</th>
-                    <th>Semester</th>
-                    <th>Credits</th>
-                    <th class="text-end">Actions</th>
+                    <th class="ps-4">Course Info</th>
+                    <th>Department & Semester</th>
+                    <th class="text-center">Credits</th>
+                    <th class="text-end pe-4">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -28,20 +32,32 @@
                     @foreach (var course in Model)
                     {
                         <tr>
-                            <td class="fw-bold text-primary">@course.CourseCode</td>
-                            <td>@course.Title</td>
-                            <td>@course.Department?.Name</td>
-                            <td><span class="badge bg-info text-dark">@course.Semester?.Name</span></td>
-                            <td>@course.Credits</td>
-                            <td class="text-end">
-                                <a asp-action="EnrolledStudents" asp-route-courseId="@course.Id" class="btn btn-sm btn-outline-success" title="View Student List">
-                                    <i class="fa-solid fa-users"></i> Students
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-light rounded p-2 me-3 text-primary border text-center" style="width: 45px;">
+                                        <i class="fa-solid fa-book-open fs-5"></i>
+                                    </div>
+                                    <div>
+                                        <div class="small text-muted text-uppercase fw-bold" style="font-size: 0.75rem;">@course.CourseCode</div>
+                                        <div class="fw-bold text-dark fs-6">@course.Title</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex flex-column">
+                                    <span class="badge bg-info bg-opacity-10 text-info border border-info mb-1 width-fit-content">
+                                        @course.Department?.Name
+                                    </span>
+                                    <span class="small fw-bold text-dark">@course.Semester?.Name</span>
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-secondary">@course.Credits Cr.</span>
+                            </td>
+                            <td class="text-end pe-4">
+                                <a asp-action="EnrolledStudents" asp-route-courseId="@course.Id" class="btn btn-sm btn-outline-info fw-bold shadow-sm" title="View Enrolled Students">
+                                    <i class="fa-solid fa-users me-1"></i> Students
                                 </a>
-
-                                @* <a asp-action="TakeAttendance" asp-route-courseId="@course.Id" class="btn btn-sm btn-outline-primary" title="Take Attendance">
-                                    <i class="fa-solid fa-calendar-check"></i> Attendance
-                                </a> *@
-
                             </td>
                         </tr>
                     }
@@ -49,9 +65,10 @@
                 else
                 {
                     <tr>
-                        <td colspan="6" class="text-center text-muted py-5">
-                            <i class="fa-solid fa-circle-exclamation fa-2x mb-3 text-warning"></i>
-                            <p class="mb-0">No courses assigned to you yet.</p>
+                        <td colspan="4" class="text-center py-5 text-muted">
+                            <div class="mb-3"><i class="fa-solid fa-folder-open fa-3x opacity-25"></i></div>
+                            <h5 class="fw-bold">No courses assigned yet</h5>
+                            <p class="mb-0">Contact admin if you think this is a mistake.</p>
                         </td>
                     </tr>
                 }
