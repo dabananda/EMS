@@ -19,17 +19,65 @@ namespace EMS.Controllers
         }
 
         // GET: ClassRoutine
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int? departmentId, int? semesterId, string teacherId, DayOfWeekEnum? day)
         {
-            var routines = await _context.ClassRoutines
+            // ১. বেসিক কুয়েরি (সব রিলেশনশিপ সহ)
+            var routinesQuery = _context.ClassRoutines
                 .Include(c => c.Course)
                     .ThenInclude(co => co.Department)
                 .Include(c => c.Course)
                     .ThenInclude(co => co.Semester)
                 .Include(c => c.Course)
                     .ThenInclude(co => co.Teacher)
-                .OrderBy(c => c.Day) // শনিবার থেকে শুরু করে সাজানো
-                .ThenBy(c => c.StartTime)
+                .AsQueryable();
+
+            // ২. ফিল্টার লজিক
+
+            // ডিপার্টমেন্ট ফিল্টার
+            if (departmentId.HasValue)
+            {
+                routinesQuery = routinesQuery.Where(r => r.Course.DepartmentId == departmentId);
+            }
+
+            // সেমিস্টার ফিল্টার
+            if (semesterId.HasValue)
+            {
+                routinesQuery = routinesQuery.Where(r => r.Course.SemesterId == semesterId);
+            }
+
+            // টিচার ফিল্টার
+            if (!string.IsNullOrEmpty(teacherId))
+            {
+                routinesQuery = routinesQuery.Where(r => r.Course.TeacherId == teacherId);
+            }
+
+            // বার (Day) ফিল্টার
+            if (day.HasValue)
+            {
+                routinesQuery = routinesQuery.Where(r => r.Day == day);
+            }
+
+            // ৩. ড্রপডাউন লিস্টের জন্য ডেটা লোড করা
+            ViewBag.DepartmentId = new SelectList(await _context.Departments.ToListAsync(), "Id", "Name", departmentId);
+            ViewBag.SemesterId = new SelectList(await _context.Semesters.ToListAsync(), "Id", "Name", semesterId);
+
+            // টিচার লিস্ট (নাম জোড়া লাগিয়ে দেখানোর জন্য)
+            var teachers = await _context.Users
+                .Include(u => u.TeacherProfile)
+                .Where(u => u.TeacherProfile != null)
+                .Select(u => new {
+                    Id = u.Id,
+                    FullName = u.FirstName + " " + u.LastName
+                })
+                .ToListAsync();
+
+            ViewBag.TeacherId = new SelectList(teachers, "Id", "FullName", teacherId);
+
+
+            // ৪. সাজানো এবং রিটার্ন (বার এবং সময় অনুযায়ী)
+            var routines = await routinesQuery
+                .OrderBy(r => r.Day)
+                .ThenBy(r => r.StartTime)
                 .ToListAsync();
 
             return View(routines);
