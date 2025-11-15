@@ -5,9 +5,14 @@
     var submissions = ViewBag.MySubmissions as List<EMS.Models.AssignmentSubmission>;
 }
 
-<h2 class="mb-4"><i class="fa-solid fa-list-check text-primary"></i> Assignments</h2>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="text-primary fw-bold"><i class="fa-solid fa-list-check me-2"></i> Assignments</h2>
+        <p class="text-muted mb-0">View and submit your coursework.</p>
+    </div>
+</div>
 
-<div class="row">
+<div class="row g-4 mb-5">
     @if (Model.Any())
     {
         @foreach (var item in Model)
@@ -15,60 +20,80 @@
             var submitted = submissions?.FirstOrDefault(s => s.AssignmentId == item.Id);
             bool isExpired = item.Deadline < DateTime.Now;
 
-            <div class="col-md-6 mb-4">
-                <div class="card shadow-sm h-100 @(isExpired ? "border-danger" : "border-success")">
-                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                        <small class="text-muted">Course: <strong>@item.Course.CourseCode</strong></small>
-                        @if (submitted != null)
-                        {
-                            <span class="badge bg-success">Submitted</span>
-                        }
-                        else if (isExpired)
-                        {
-                            <span class="badge bg-danger">Expired</span>
-                        }
-                        else
-                        {
-                            <span class="badge bg-warning text-dark">Pending</span>
-                        }
-                    </div>
-                    <div class="card-body">
-                        <h5 class="card-title">@item.Title</h5>
-                        <p class="card-text text-muted small">
-                            Deadline: @item.Deadline.ToString("dd MMM yyyy, h:mm tt")
-                        </p>
-                        <hr />
-                        <p class="card-text">@(item.Description.Length > 100 ? item.Description.Substring(0, 100) + "..." : item.Description)</p>
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm border-0 assignment-card">
 
+                    <div class="card-header bg-white border-0 pt-3 pb-0">
+                        <div class="mb-2">
+                            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary">@item.Course.CourseCode</span>
+                        </div>
+
+                        <div class="mb-2">
+                            @if (submitted != null)
+                            {
+                                if (submitted.MarksObtained != null)
+                                {
+                                    <span class="badge bg-success shadow-sm"><i class="fa-solid fa-check-double me-1"></i> Graded</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-info text-dark shadow-sm"><i class="fa-solid fa-check me-1"></i> Submitted</span>
+                                }
+                            }
+                            else if (isExpired)
+                            {
+                                <span class="badge bg-danger shadow-sm"><i class="fa-solid fa-clock me-1"></i> Expired</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-warning text-dark shadow-sm"><i class="fa-solid fa-hourglass-half me-1"></i> Pending</span>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold text-dark mb-1 text-truncate" title="@item.Title">@item.Title</h5>
+                        <small class="text-muted d-block mb-3 text-truncate">@item.Course.Title</small>
+
+                        <div class="mb-3">
+                            <small class="text-muted fw-bold text-uppercase" style="font-size: 0.7rem;">Deadline</small>
+                            <div class="d-flex align-items-center @(isExpired ? "text-danger" : "text-dark")">
+                                <i class="fa-regular fa-calendar-days me-2"></i>
+                                <strong>@item.Deadline.ToString("dd MMM yyyy, h:mm tt")</strong>
+                            </div>
+                        </div>
+
+                        <p class="card-text text-muted small text-truncate-3 bg-light p-2 rounded border">
+                            @(item.Description.Length > 80 ? item.Description.Substring(0, 80) + "..." : item.Description)
+                        </p>
+                    </div>
+
+                    <div class="card-footer bg-white border-0 pb-3 pt-0">
                         @if (submitted == null && !isExpired)
                         {
-                            <a asp-action="SubmitAssignment" asp-route-id="@item.Id" class="btn btn-primary w-100">
-                                <i class="fa-solid fa-upload"></i> Submit Now
+                            <a asp-action="SubmitAssignment" asp-route-id="@item.Id" class="btn btn-primary w-100 fw-bold shadow-sm">
+                                <i class="fa-solid fa-upload me-2"></i> Submit Assignment
                             </a>
                         }
                         else if (submitted != null)
                         {
                             <div class="d-grid gap-2">
-                                <button class="btn btn-success disabled" style="opacity: 1;">
-                                    <i class="fa-solid fa-check-circle"></i> Submitted on @submitted.SubmissionDate.ToString("dd MMM")
-                                </button>
-
                                 @if (submitted.MarksObtained != null)
                                 {
-                                    <button type="button" class="btn btn-outline-primary"
+                                    <button type="button" class="btn btn-outline-success fw-bold"
                                             data-bs-toggle="modal" data-bs-target="#resultModal"
                                             data-title="@item.Title"
                                             data-marks="@submitted.MarksObtained"
                                             data-total="@item.TotalMarks"
                                             data-feedback="@(string.IsNullOrEmpty(submitted.TeacherFeedback) ? "No feedback provided." : submitted.TeacherFeedback)">
-                                        <i class="fa-solid fa-square-poll-vertical"></i> View Result
+                                        <i class="fa-solid fa-square-poll-vertical me-2"></i> View Result
                                     </button>
                                 }
                                 else
                                 {
-                                    <div class="text-center small text-warning mt-2">
-                                        <i class="fa-solid fa-clock"></i> Waiting for grading...
-                                    </div>
+                                    <button class="btn btn-light text-muted border" disabled>
+                                        <i class="fa-solid fa-clock me-2"></i> Waiting for Grade
+                                    </button>
                                 }
                             </div>
                         }
@@ -83,60 +108,69 @@
     }
     else
     {
-        <div class="col-12 text-center text-muted py-5">
-            <i class="fa-solid fa-clipboard-check fa-3x mb-3"></i>
-            <h4>No assignments available.</h4>
+        <div class="col-12 text-center py-5 text-muted">
+            <div class="mb-3"><i class="fa-solid fa-clipboard-check fa-3x opacity-25"></i></div>
+            <h5 class="fw-bold">No assignments available</h5>
+            <p class="mb-0">You're all caught up! Check back later.</p>
         </div>
     }
 </div>
 
 <div class="modal fade" id="resultModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title">Assignment Result</h5>
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title fw-bold"><i class="fa-solid fa-award me-2"></i> Assignment Result</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body text-center p-4">
-                <h4 class="mb-3 text-dark" id="modalAssignmentTitle"></h4>
+                <h5 class="mb-2 text-dark fw-bold" id="modalAssignmentTitle"></h5>
+                <p class="text-muted small mb-4">Result Overview</p>
 
-                <div class="d-inline-block border border-4 border-primary rounded-circle p-4 mb-3">
-                    <div class="display-4 fw-bold text-primary">
-                        <span id="modalMarks"></span>
+                <div class="d-inline-block border border-4 border-success rounded-circle p-4 mb-4 position-relative" style="width: 120px; height: 120px; display: flex; align-items: center; justify-content: center;">
+                    <div>
+                        <div class="h2 fw-bold text-success mb-0"><span id="modalMarks"></span></div>
+                        <div class="small text-muted" style="font-size: 0.7rem; line-height: 1;">out of <span id="modalTotal"></span></div>
                     </div>
-                    <div class="small text-muted">out of <span id="modalTotal"></span></div>
                 </div>
 
-                <hr />
-
-                <div class="text-start">
-                    <h6 class="fw-bold text-secondary"><i class="fa-solid fa-comment-dots"></i> Teacher's Feedback:</h6>
-                    <div class="alert alert-light border text-dark fst-italic" id="modalFeedback">
-                    </div>
+                <div class="text-start bg-light p-3 rounded border">
+                    <h6 class="fw-bold text-secondary small text-uppercase mb-2"><i class="fa-solid fa-comment-dots me-1"></i> Teacher's Feedback</h6>
+                    <p class="mb-0 text-dark fst-italic small" id="modalFeedback"></p>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <div class="modal-footer border-0 justify-content-center pb-4">
+                <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
 </div>
 
+<style>
+    .text-truncate-3 {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .assignment-card:hover {
+        transform: translateY(-3px);
+        transition: all 0.3s ease;
+        box-shadow: 0 .5rem 1rem rgba(0,0,0,.15) !important;
+    }
+</style>
+
 @section Scripts {
     <script>
-        // মোডাল ওপেন হওয়ার সময় ডেটা লোড করার স্ক্রিপ্ট
         var resultModal = document.getElementById('resultModal');
         resultModal.addEventListener('show.bs.modal', function (event) {
-            // যে বাটনটিতে ক্লিক করা হয়েছে
             var button = event.relatedTarget;
-
-            // বাটন থেকে ডেটা বের করা (data-attributes)
             var title = button.getAttribute('data-title');
             var marks = button.getAttribute('data-marks');
             var total = button.getAttribute('data-total');
             var feedback = button.getAttribute('data-feedback');
 
-            // মোডালের ভেতরে তথ্য বসানো
             document.getElementById('modalAssignmentTitle').textContent = title;
             document.getElementById('modalMarks').textContent = marks;
             document.getElementById('modalTotal').textContent = total;
