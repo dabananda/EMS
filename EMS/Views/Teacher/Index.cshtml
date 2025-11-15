@@ -94,7 +94,7 @@
                     <tbody>
                         @if (Model.AssignedCourses.Any())
                         {
-                            @foreach (var course in Model.AssignedCourses.Take(5)) // প্রথম ৫টি দেখাবে
+                            @foreach (var course in Model.AssignedCourses.Take(5))
                             {
                                 <tr>
                                     <td class="ps-4">
@@ -103,10 +103,9 @@
                                     </td>
                                     <td><span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary">@course.Semester?.Name</span></td>
                                     <td class="text-end pe-4">
-                                        <div class="btn-group btn-group-sm">
-                                            <a asp-action="EnrolledStudents" asp-route-courseId="@course.Id" class="btn btn-outline-info" title="Students"><i class="fa-solid fa-users"></i></a>
-                                            <a asp-action="TakeAttendance" asp-route-courseId="@course.Id" class="btn btn-outline-success" title="Attendance"><i class="fa-solid fa-check"></i></a>
-                                        </div>
+                                        <a asp-action="EnrolledStudents" asp-route-courseId="@course.Id" class="btn btn-sm btn-outline-info" title="View Students">
+                                            <i class="fa-solid fa-users me-1"></i> Students
+                                        </a>
                                     </td>
                                 </tr>
                             }
@@ -162,8 +161,12 @@
                 <div class="bg-white text-primary rounded-circle d-inline-flex p-3 mb-3 shadow-sm">
                     <i class="fa-solid fa-user-tie fa-2x"></i>
                 </div>
-                <h5 class="fw-bold mb-0">@Model.Name</h5>
-                <p class="mb-2 opacity-75 small">@Model.Email</p>
+                <h5 class="fw-bold mb-1">@Model.Name</h5>
+
+                <div class="mb-3">
+                    <span class="badge bg-white text-primary fw-bold px-3">@Model.Designation</span>
+                </div>
+                <p class="mb-1 opacity-75 small">@Model.Email</p>
                 <p class="mb-0 small"><i class="fa-solid fa-phone me-1"></i> @Model.Phone</p>
             </div>
         </div>
